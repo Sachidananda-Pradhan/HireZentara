@@ -3,12 +3,13 @@ package com.HZ.HireZentara.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.processing.Pattern;
+
+import java.io.File;
 
 @Entity
 @Data
-@Table(name = "candidate_registration" ,S)
-public class CandidateRegistration  extends CommonEntity{
+@Table( schema = "HIRE_ZENTARA", name = "CANDIDATE")
+public class Candidate extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,10 +29,12 @@ public class CandidateRegistration  extends CommonEntity{
     private String reEnterEmail;
 
     @NotNull
-    @Pattern(ApplictionConstant.REGEXP, message = "Mobile number must be 10 digits")
     private String mobileNo;
 
     private String linkedInProfile;
 
     private String website;
+
+    @Lob
+    private byte[] resume;
 }
