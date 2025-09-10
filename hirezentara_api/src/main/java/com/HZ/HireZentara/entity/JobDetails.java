@@ -1,17 +1,24 @@
 package com.HZ.HireZentara.entity;
 
+import com.HZ.HireZentara.enums.JobStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
 @Table(schema = "HIRE_ZENTARA", name = "JOB_DETAILS")
-public class JobDetails {
+public class JobDetails extends  BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "job_details_SEQ")
     @SequenceGenerator(sequenceName = "job_details", allocationSize = 1, name = "job_details_SEQ")
-    private Long jobId;
+    private Long id;
+
+    @Column(name = "job_id", length = 50, unique = true, nullable = false)
+    private String jobId;
 
     @Column(name = "job_title", length = 100, nullable = false)
     private String jobTitle;
@@ -22,22 +29,25 @@ public class JobDetails {
     @Column(name = "location", length = 255)
     private String location;
 
-    private String employmentType;
-    private String department;
-    private String postedDate;
-    private String applicationDeadline;
-    private String requirements;
-    private String responsibilities;
-    private String salaryRange;
-    private String companyName;
-    private String companyWebsite;
-    private String companyLogoUrl;
-    private String jobStatus; // e.g., Open, Closed, On Hold
-    private String recruiterName;
-    private String recruiterEmail;
-    private String recruiterPhoneNumber;
+    @Column(name="roles_and_responsibilities", length = 5000)
+    private List<String> rolesAndResponsibilities;
 
+    @Column(name="skills_and_experience", columnDefinition = "CLOB")
+    private List<String> skillsAndExperience;
 
+    @Column(name="job_status", length = 20, nullable = false)
+    private JobStatus jobStatus;
 
+    @Column(name="posted_date", nullable = false)
+    private Date postedDate;
+
+    @Column(name="closing_day_of_job", nullable = false)
+    private  Date closingDayofJob;
+
+    @Column(name="job_link", length = 500)
+    private  String jobLink;
+
+    @OneToMany(mappedBy = "jobDetails", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Candidate> candidates;
 
 }

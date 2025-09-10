@@ -14,5 +14,6 @@ public class CandidateRegistrationRequest {
     private String linkedInProfile;
     private String country;
     private String website;
+    private String jobId;
 
 }

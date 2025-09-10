@@ -11,30 +11,47 @@ import java.io.File;
 @Table( schema = "HIRE_ZENTARA", name = "CANDIDATE")
 public class Candidate extends BaseEntity{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
-    private int id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "candidate_SEQ")
+        @SequenceGenerator(name = "candidate_SEQ", sequenceName = "candidate", allocationSize = 1)
+        private int id;
 
-    @NotNull
-    private String firstName;
+        @NotNull
+        @Column(name = "first_name", length = 50, nullable = false)
+        private String firstName;
 
-    @NotNull
-    private String lastName;
+        @NotNull
+        @Column(name = "last_name", length = 50, nullable = false)
+        private String lastName;
 
-    @NotNull
-    private String email;
+        @NotNull
+        @Column(name = "full_name", length = 100, nullable = false)
+        private String fullName;
 
-    @NotNull
-    private String reEnterEmail;
+        @NotNull
+        @Column(name = "email", length = 100, nullable = false, unique = true)
+        private String email;
 
-    @NotNull
-    private String mobileNo;
+        @NotNull
+        @Column(name = "re_enter_email", length = 100, nullable = false)
+        private String reEnterEmail;
 
-    private String linkedInProfile;
+        @NotNull
+        @Column(name = "mobile_no", length = 20, nullable = false, unique = true)
+        private String mobileNo;
 
-    private String website;
+        @Column(name = "linkedin_profile", length = 255)
+        private String linkedInProfile;
 
-    @Lob
-    private byte[] resume;
+        @Column(name = "website", length = 255)
+        private String website;
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "job_id", nullable = false)
+        private JobDetails jobDetails;
+
+        @Lob
+        @Column(name = "resume", nullable = false)
+        private byte[] resume;
+
 }

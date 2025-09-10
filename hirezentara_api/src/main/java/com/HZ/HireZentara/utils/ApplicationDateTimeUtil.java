@@ -95,4 +95,12 @@ public class ApplicationDateTimeUtil {
 		Instant later = now.plus(Duration.ofMinutes(15));
 		return later.getEpochSecond();
 	}
+
+    public Date createJobExpiringDate(String expiringDayOfJob, Date jobPostedDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(jobPostedDate);
+        int daysToAdd = Integer.parseInt(expiringDayOfJob);
+        calendar.add(Calendar.DAY_OF_MONTH, daysToAdd);
+        return calendar.getTime();
+    }
 }

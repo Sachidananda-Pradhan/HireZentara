@@ -3,14 +3,30 @@ package com.HZ.HireZentara.utils;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.Date;
 import java.util.UUID;
 
 
 @Service
 public class IDGenerator {
 
-	
-	public  String generateCorrelationId()
+
+    public static String createJobId() {
+        SecureRandom secureRnd = new SecureRandom();
+        char [] digits = new char[8];
+        digits[0] = (char) (secureRnd.nextInt(9) + '1');
+        for(int i=1; i<digits.length; i++) {
+            digits[i] = (char) (secureRnd.nextInt(10) + '0');
+        }
+        return new String(digits);
+    }
+
+    public static String generateEncryptedToken(String jobId, Date jobPostedDate) {
+        String rawToken = jobId + "-" + jobPostedDate.getTime();
+        return UUID.nameUUIDFromBytes(rawToken.getBytes()).toString();
+    }
+
+    public  String generateCorrelationId()
 	{
 		SecureRandom secureRnd = new SecureRandom();
 	    char [] digits = new char[11];

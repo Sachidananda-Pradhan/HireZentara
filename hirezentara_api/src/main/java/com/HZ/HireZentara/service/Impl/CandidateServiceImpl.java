@@ -4,8 +4,10 @@ import com.HZ.HireZentara.constant.ApplicationConstant;
 import com.HZ.HireZentara.dto.request.CandidateRegistrationRequest;
 import com.HZ.HireZentara.dto.response.CandidateRegistrationResposne;
 import com.HZ.HireZentara.entity.Candidate;
+import com.HZ.HireZentara.entity.JobDetails;
 import com.HZ.HireZentara.exceptions.CandidateExistsException;
 import com.HZ.HireZentara.repository.CandidateRepository;
+import com.HZ.HireZentara.repository.JobDetailsRepository;
 import com.HZ.HireZentara.service.CandidateService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,9 +19,11 @@ import java.util.Date;
 public class CandidateServiceImpl implements CandidateService {
 
     private  final CandidateRepository candidateRepository;
+    private  final JobDetailsRepository jobDetailsRepository;
 
-    public CandidateServiceImpl(CandidateRepository candidateRepository) {
+    public CandidateServiceImpl(CandidateRepository candidateRepository, JobDetailsRepository jobDetailsRepository) {
         this.candidateRepository = candidateRepository;
+        this.jobDetailsRepository = jobDetailsRepository;
     }
 
     @Override
@@ -33,20 +37,25 @@ public class CandidateServiceImpl implements CandidateService {
         if (candidateRegistrationRequest.getMobileNo() != null && candidateRepository.findByMobileNo(candidateRegistrationRequest.getMobileNo()).isPresent()) {
             throw new CandidateExistsException(null, 409, "Candidate with same phone number already exists");
         }
-        saveCandidate(candidateRegistrationRequest, resume);
+
+        JobDetails jobDetails = jobDetailsRepository.findByJobId(candidateRegistrationRequest.getJobId())
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        saveCandidate(candidateRegistrationRequest, resume,jobDetails);
         return new CandidateRegistrationResposne("Candidate registered successfully");
     }
 
-    private void saveCandidate(CandidateRegistrationRequest candidateRegistrationRequest, MultipartFile resume) {
+    private void saveCandidate(CandidateRegistrationRequest candidateRegistrationRequest, MultipartFile resume,JobDetails jobDetails) {
         Candidate candidate = new Candidate();
         candidate.setFirstName(candidateRegistrationRequest.getFirstName());
         candidate.setLastName(candidateRegistrationRequest.getLastName());
+        candidate.setFullName(candidateRegistrationRequest.getFirstName() + " " + candidateRegistrationRequest.getLastName());
         candidate.setEmail(candidateRegistrationRequest.getEmail());
         candidate.setReEnterEmail(candidateRegistrationRequest.getReEnterEmail());
         candidate.setMobileNo(candidateRegistrationRequest.getMobileNo());
-        candidate.setMobileNo(candidateRegistrationRequest.getMobileNo());
         candidate.setLinkedInProfile(candidateRegistrationRequest.getLinkedInProfile());
         candidate.setWebsite(candidateRegistrationRequest.getWebsite());
+        candidate.setJobDetails(jobDetails);
         candidate.setCreatedAt(new Date());
         candidate.setCreatedBy(ApplicationConstant.CANDIDATE);
 
