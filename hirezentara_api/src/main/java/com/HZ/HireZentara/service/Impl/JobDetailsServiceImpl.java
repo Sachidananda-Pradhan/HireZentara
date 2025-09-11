@@ -4,6 +4,7 @@ import com.HZ.HireZentara.constant.ApplicationConstant;
 import com.HZ.HireZentara.dto.CandidateDto;
 import com.HZ.HireZentara.dto.request.JobDetailsRequest;
 import com.HZ.HireZentara.dto.response.CandidateListResponse;
+import com.HZ.HireZentara.dto.response.DownloadCandiateResponse;
 import com.HZ.HireZentara.dto.response.JobDetailsResponse;
 import com.HZ.HireZentara.dto.response.PageResponse;
 import com.HZ.HireZentara.entity.Candidate;
@@ -13,33 +14,35 @@ import com.HZ.HireZentara.repository.CandidateRepository;
 import com.HZ.HireZentara.repository.JobDetailsRepository;
 import com.HZ.HireZentara.service.JobDetailsService;
 import com.HZ.HireZentara.utils.ApplicationDateTimeUtil;
+import com.HZ.HireZentara.utils.ExcelReportGenerator;
 import com.HZ.HireZentara.utils.IDGenerator;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class JobDetailsServiceImpl implements JobDetailsService {
 
-     private  final JobDetailsRepository jobDetailsRepository;
+     private final JobDetailsRepository jobDetailsRepository;
      private final ApplicationDateTimeUtil applicationDateTimeUtil;
      private final CandidateRepository candidateRepository;
+     private final ExcelReportGenerator excelReportGenerator;
 
 
-    public JobDetailsServiceImpl(JobDetailsRepository jobDetailsRepository, ApplicationDateTimeUtil applicationDateTimeUtil, CandidateRepository candidateRepository) {
+    public JobDetailsServiceImpl(JobDetailsRepository jobDetailsRepository, ApplicationDateTimeUtil applicationDateTimeUtil, CandidateRepository candidateRepository, ExcelReportGenerator excelReportGenerator) {
         this.jobDetailsRepository = jobDetailsRepository;
         this.applicationDateTimeUtil = applicationDateTimeUtil;
         this.candidateRepository = candidateRepository;
+        this.excelReportGenerator = excelReportGenerator;
     }
 
     @Override
@@ -138,9 +141,9 @@ public class JobDetailsServiceImpl implements JobDetailsService {
 //    }
 
     @Override
-    public CandidateListResponse getCandidateListByJobId(Long jobId, Optional<Integer> pageNumber, Optional<Integer> pageSize, boolean isRecent, Optional<Integer> days, String sortFlag, Optional<String> search) {
+    public CandidateListResponse getCandidateListByJobId(String jobId, Optional<Integer> pageNumber, Optional<Integer> pageSize, boolean isRecent, Optional<Integer> days, String sortFlag, Optional<String> search) {
             // Fetch job details
-            JobDetails jobDetails = jobDetailsRepository.findById(jobId)
+            JobDetails jobDetails = jobDetailsRepository.findByJobId(jobId)
                     .orElseThrow(() -> new RuntimeException("Job not found with ID: " + jobId));
 
             // Fetch all candidates for the job
@@ -191,8 +194,8 @@ public class JobDetailsServiceImpl implements JobDetailsService {
 
 
     @Override
-    public String updateJobExpiryTime(Long jobId, String days) {
-        JobDetails job = jobDetailsRepository.findById(jobId)
+    public String updateJobExpiryTime(String jobId, String days) {
+        JobDetails job = jobDetailsRepository.findByJobId(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
         int daysToAdd = Integer.parseInt(days);
@@ -208,8 +211,8 @@ public class JobDetailsServiceImpl implements JobDetailsService {
     }
 
     @Override
-    public String deleteTheJob(Long jobId) {
-        JobDetails job = jobDetailsRepository.findById(jobId)
+    public String deleteTheJob(String jobId) {
+        JobDetails job = jobDetailsRepository.findByJobId(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found with ID: " + jobId));
         // Check if job is already expired
         if (job.getClosingDayofJob().before(new Date()) || job.getJobStatus() == JobStatus.CLOSED) {
@@ -220,14 +223,64 @@ public class JobDetailsServiceImpl implements JobDetailsService {
         job.setJobStatus(JobStatus.CLOSED);
 
         jobDetailsRepository.save(job);
-        return + jobId + job.getJobTitle() + " has been successfully marked as closed.";
+        return  job.getJobId() + job.getJobTitle() + " has been successfully marked as closed.";
     }
-
-
 
     @Override
-    public JobDetails getJobDetailsById(Long jobId) {
-        return jobDetailsRepository.findById(jobId).orElse(null);
+    public byte[] generateAppliedCandidatesxls(String jobId) {
+        List<DownloadCandiateResponse> downloadCandiateResponse = fetchCandiateList(jobId);
+        List<String> headers =createHeaders();
+        List<List<Object>> data = createObjectResponse(downloadCandiateResponse);
+        String jobTitle = downloadCandiateResponse.isEmpty() ? "Unknown Job Title" : downloadCandiateResponse.get(0).getJobTitle();
+        return excelReportGenerator.createExcelReport(headers, data, jobTitle, jobId);
     }
 
+
+    private List<List<Object>> createObjectResponse(List<DownloadCandiateResponse> responses) {
+        return responses.stream()
+                .map(response -> Arrays.asList(
+                        (Object) response.getCandidateName(), (Object) response.getMobile(), (Object) response.getEmail(), (Object) response.getLocation(), (Object) response.getJobTitle(),
+                        (Object) response.getLinkedInProfile()
+                ))
+                .collect(Collectors.toList());
+    }
+    private List<String> createHeaders() {
+        return Arrays.asList(ApplicationConstant.CANDIDATE_NAME, ApplicationConstant.MOBILE_NUMBER, ApplicationConstant.EMAIL_ID, ApplicationConstant.LOCATION, ApplicationConstant.JOB_TITLE, ApplicationConstant.LINKEDIN_PROFILE
+        );
+    }
+    private List<DownloadCandiateResponse> fetchCandiateList(String jobId) {
+        return candidateRepository.findcandidatelistbyjobId(jobId);
+    }
+    @Override
+    public JobDetails getJobDetailsById(String jobId) {
+        return jobDetailsRepository.findByJobId(jobId).orElse(null);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> downloadResume(String jobId) {
+                try {
+                    // Fetch resume data (e.g., from DB, file system, or cloud)
+                    byte[] resumeData = fetchResumeData(jobId);
+                    String fileName = "Candidate_Resume_" + jobId + ".pdf";
+
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_PDF);
+                    headers.setContentDisposition(ContentDisposition.builder("attachment").filename(fileName).build());
+                    headers.setContentLength(resumeData.length);
+
+                    return new ResponseEntity<>(resumeData, headers, HttpStatus.OK);
+                } catch (Exception e) {
+                    // Log error if needed
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+                }
+            }
+
+            private byte[] fetchResumeData(String jobId) {
+                // Example logic: fetch from DB or file system
+                Candidate resume = candidateRepository.findByJobId(jobId);
+                if (resume == null || resume.getResume() == null) {
+                    throw new RuntimeException("Resume not found for jobId: " + jobId);
+                }
+                return resume.getResume();// Assuming this returns byte[]
+            }
 }

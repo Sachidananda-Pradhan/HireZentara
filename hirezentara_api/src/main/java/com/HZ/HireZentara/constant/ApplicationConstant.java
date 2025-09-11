@@ -48,6 +48,12 @@ public class ApplicationConstant {
     public static final String LOGOUT_SUCCESS_MSG = "Logout successfully.";
     public static final String LOGOUT_FAILED_MSG = "Logout failed. Invalid session.";
     public static final String USERS_NOT_FOUND_MESSAGE = "Users not found.";
+    public static final String CANDIDATE_NAME = "CandidateName";
+    public static final String MOBILE_NUMBER = "Mobile Number";
+    public static final String EMAIL_ID = "Email_id";
+    public static final String LOCATION = "Location";
+    public static final String JOB_TITLE = "Job_title";
+    public static final String LINKEDIN_PROFILE = "LinkedIn Profile";
 
     //error codes
     public static final int HZ_196 = 196;
