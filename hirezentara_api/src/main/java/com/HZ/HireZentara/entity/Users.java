@@ -20,10 +20,9 @@ import lombok.Data;
 @Table(schema = "HIRE_ZENTARA", name = "USERS")
 public class Users {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USERS_SEQ")
-    @SequenceGenerator(sequenceName = "users_seq", allocationSize = 1, name = "USERS_SEQ")
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
 	@Column(name = "user_name", length = 30, unique = true)
 	private String userName;

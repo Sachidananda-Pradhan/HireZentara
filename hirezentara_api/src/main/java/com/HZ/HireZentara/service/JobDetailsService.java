@@ -3,8 +3,8 @@ package com.HZ.HireZentara.service;
 import com.HZ.HireZentara.dto.request.JobDetailsRequest;
 import com.HZ.HireZentara.dto.response.CandidateListResponse;
 import com.HZ.HireZentara.dto.response.JobDetailsResponse;
+import com.HZ.HireZentara.dto.response.JobResponse;
 import com.HZ.HireZentara.dto.response.PageResponse;
-import com.HZ.HireZentara.entity.JobDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +14,7 @@ import java.util.Optional;
 @Service
 public interface JobDetailsService {
 
-    JobDetails getJobDetailsById(String jobId);
-
-    JobDetailsResponse createJob(JobDetailsRequest jobDetailsRequest);
+    JobResponse createJob(JobDetailsRequest jobDetailsRequest);
 
     PageResponse getAllJobDetails(Optional<Integer> pageSize, Optional<Integer> pageNumber, boolean isRecent, Optional<Integer> days, List<String> jobStatus, String sortFlag, String sortBy, Optional<String> search);
     
@@ -29,4 +27,6 @@ public interface JobDetailsService {
     byte[] generateAppliedCandidatesxls(String jobId);
 
     ResponseEntity<byte[]> downloadResume(String jobId);
+
+    JobDetailsResponse getJobDetailsById(String jobId);
 }

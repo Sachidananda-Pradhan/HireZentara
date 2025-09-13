@@ -19,10 +19,9 @@ import lombok.Data;
 @Table(schema = "HIRE_ZENTARA", name = "ROLES")
 public class Roles {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ROLES_SEQ")
-    @SequenceGenerator(sequenceName = "roles_seq", allocationSize = 1, name = "ROLES_SEQ")
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
 	@Column(name = "role_name", length = 30, unique = true)
 	private String roleName;

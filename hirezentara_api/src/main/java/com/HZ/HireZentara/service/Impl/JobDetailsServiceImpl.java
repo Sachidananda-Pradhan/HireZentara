@@ -3,10 +3,7 @@ package com.HZ.HireZentara.service.Impl;
 import com.HZ.HireZentara.constant.ApplicationConstant;
 import com.HZ.HireZentara.dto.CandidateDto;
 import com.HZ.HireZentara.dto.request.JobDetailsRequest;
-import com.HZ.HireZentara.dto.response.CandidateListResponse;
-import com.HZ.HireZentara.dto.response.DownloadCandiateResponse;
-import com.HZ.HireZentara.dto.response.JobDetailsResponse;
-import com.HZ.HireZentara.dto.response.PageResponse;
+import com.HZ.HireZentara.dto.response.*;
 import com.HZ.HireZentara.entity.Candidate;
 import com.HZ.HireZentara.entity.JobDetails;
 import com.HZ.HireZentara.enums.JobStatus;
@@ -46,7 +43,7 @@ public class JobDetailsServiceImpl implements JobDetailsService {
     }
 
     @Override
-    public JobDetailsResponse createJob(JobDetailsRequest jobDetailsRequest) {
+    public JobResponse createJob(JobDetailsRequest jobDetailsRequest) {
         String jobId = IDGenerator.createJobId();
         Date jobPostedDate = new Date();
         Date jobExpiringDate  = applicationDateTimeUtil.createJobExpiringDate(jobDetailsRequest.getExpiringDayOfJob(),jobPostedDate);
@@ -58,8 +55,8 @@ public class JobDetailsServiceImpl implements JobDetailsService {
         jobDetails.setJobTitle(jobDetailsRequest.getJobTitle());
         jobDetails.setJobDescription(jobDetailsRequest.getJobDescription());
         jobDetails.setLocation(jobDetailsRequest.getLocation());
-        jobDetails.setRolesAndResponsibilities(jobDetailsRequest.getRolesAndResponsibilities());
-        jobDetails.setSkillsAndExperience(jobDetailsRequest.getSkillsAndExperience());
+        jobDetails.setRolesAndResponsibilities(  String.join(",", jobDetailsRequest.getRolesAndResponsibilities()));
+        jobDetails.setSkillsAndExperience(String.join(",", jobDetailsRequest.getSkillsAndExperience()));
         jobDetails.setJobStatus(JobStatus.OPEN);
         jobDetails.setPostedDate(jobPostedDate);
         jobDetails.setClosingDayofJob(jobExpiringDate);
@@ -69,10 +66,10 @@ public class JobDetailsServiceImpl implements JobDetailsService {
 
         // Save to database
         jobDetailsRepository.save(jobDetails);
-         JobDetailsResponse jobDetailsResponse = new JobDetailsResponse();
-            jobDetailsResponse.setJobLink(joblink);
+        JobResponse  jobResponse = new JobResponse();
+        jobResponse.setJobLink(joblink);
 
-        return jobDetailsResponse;
+        return jobResponse;
     }
 
     @Override
@@ -147,7 +144,7 @@ public class JobDetailsServiceImpl implements JobDetailsService {
                     .orElseThrow(() -> new RuntimeException("Job not found with ID: " + jobId));
 
             // Fetch all candidates for the job
-            List<Candidate> candidates = candidateRepository.findByJobDetailsId(jobId);
+            List<Candidate> candidates = candidateRepository.findByJobDetails_JobId(jobId);
 
             // Filter by recent (based on createdAt or postedDate)
             if (isRecent && days.isPresent()) {
@@ -176,6 +173,11 @@ public class JobDetailsServiceImpl implements JobDetailsService {
             int start = Math.toIntExact((long) page * size);
             int end = Math.min(start + size, candidates.size());
             List<Candidate> pagedCandidates = candidates.subList(start, end);
+        if (start >= candidates.size()) {
+            pagedCandidates = Collections.emptyList();
+        } else {
+            pagedCandidates = candidates.subList(start, end);
+        }
 
             // Map to DTOs
             List<CandidateDto> candidateDtos = pagedCandidates.stream()
@@ -228,18 +230,18 @@ public class JobDetailsServiceImpl implements JobDetailsService {
 
     @Override
     public byte[] generateAppliedCandidatesxls(String jobId) {
-        List<DownloadCandiateResponse> downloadCandiateResponse = fetchCandiateList(jobId);
+        List<DownloadCandidateResponse> downloadCandidateResponse = fetchCandiateList(jobId);
         List<String> headers =createHeaders();
-        List<List<Object>> data = createObjectResponse(downloadCandiateResponse);
-        String jobTitle = downloadCandiateResponse.isEmpty() ? "Unknown Job Title" : downloadCandiateResponse.get(0).getJobTitle();
+        List<List<Object>> data = createObjectResponse(downloadCandidateResponse);
+        String jobTitle = downloadCandidateResponse.isEmpty() ? "Unknown Job Title" : downloadCandidateResponse.get(0).getJobTitle();
         return excelReportGenerator.createExcelReport(headers, data, jobTitle, jobId);
     }
 
 
-    private List<List<Object>> createObjectResponse(List<DownloadCandiateResponse> responses) {
+    private List<List<Object>> createObjectResponse(List<DownloadCandidateResponse> responses) {
         return responses.stream()
                 .map(response -> Arrays.asList(
-                        (Object) response.getCandidateName(), (Object) response.getMobile(), (Object) response.getEmail(), (Object) response.getLocation(), (Object) response.getJobTitle(),
+                        (Object) response.getCandidateName(), (Object) response.getMobile(), (Object) response.getEmail(), (Object) response.getJobTitle(),
                         (Object) response.getLinkedInProfile()
                 ))
                 .collect(Collectors.toList());
@@ -248,13 +250,10 @@ public class JobDetailsServiceImpl implements JobDetailsService {
         return Arrays.asList(ApplicationConstant.CANDIDATE_NAME, ApplicationConstant.MOBILE_NUMBER, ApplicationConstant.EMAIL_ID, ApplicationConstant.LOCATION, ApplicationConstant.JOB_TITLE, ApplicationConstant.LINKEDIN_PROFILE
         );
     }
-    private List<DownloadCandiateResponse> fetchCandiateList(String jobId) {
-        return candidateRepository.findcandidatelistbyjobId(jobId);
+    private List<DownloadCandidateResponse> fetchCandiateList(String jobId) {
+        return candidateRepository.findCandidateListByJobId(jobId);
     }
-    @Override
-    public JobDetails getJobDetailsById(String jobId) {
-        return jobDetailsRepository.findByJobId(jobId).orElse(null);
-    }
+
 
     @Override
     public ResponseEntity<byte[]> downloadResume(String jobId) {
@@ -275,9 +274,37 @@ public class JobDetailsServiceImpl implements JobDetailsService {
                 }
             }
 
-            private byte[] fetchResumeData(String jobId) {
+    @Override
+    public JobDetailsResponse getJobDetailsById(String jobId) {
+
+        JobDetails jobDetails = jobDetailsRepository.findByJobId(jobId)
+                .orElseThrow(() -> new RuntimeException("Job not found with ID: " + jobId));
+
+        JobDetailsResponse response = new JobDetailsResponse();
+
+        response.setJobId(jobDetails.getJobId());
+        response.setJobTitle(jobDetails.getJobTitle());
+        response.setJobDescription(jobDetails.getJobDescription());
+        response.setLocation(jobDetails.getLocation());
+
+        // Convert String (DB) → List<String> (Response)
+        if (jobDetails.getRolesAndResponsibilities() != null) {
+            response.setRolesAndResponsibilities(
+                    Arrays.asList(jobDetails.getRolesAndResponsibilities().split(","))
+            );
+        }
+
+        if (jobDetails.getSkillsAndExperience() != null) {
+            response.setSkillsAndExperience(
+                    Arrays.asList(jobDetails.getSkillsAndExperience().split(","))
+            );
+        }
+        return response;
+    }
+
+    private byte[] fetchResumeData(String jobId) {
                 // Example logic: fetch from DB or file system
-                Candidate resume = candidateRepository.findByJobId(jobId);
+                Candidate resume = candidateRepository.findByJobDetailsJobId(jobId);
                 if (resume == null || resume.getResume() == null) {
                     throw new RuntimeException("Resume not found for jobId: " + jobId);
                 }

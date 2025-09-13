@@ -4,10 +4,7 @@ import com.HZ.HireZentara.constant.ApplicationConstant;
 import com.HZ.HireZentara.dto.request.APIRequest;
 import com.HZ.HireZentara.dto.request.CandidateRegistrationRequest;
 import com.HZ.HireZentara.dto.request.JobDetailsRequest;
-import com.HZ.HireZentara.dto.response.APIResponse;
-import com.HZ.HireZentara.dto.response.CandidateListResponse;
-import com.HZ.HireZentara.dto.response.JobDetailsResponse;
-import com.HZ.HireZentara.dto.response.PageResponse;
+import com.HZ.HireZentara.dto.response.*;
 import com.HZ.HireZentara.entity.Client;
 import com.HZ.HireZentara.entity.JobDetails;
 import com.HZ.HireZentara.exceptions.ExceptionResponseGenerator;
@@ -60,9 +57,9 @@ public class JobController extends BaseController {
             if (object instanceof CandidateRegistrationRequest) {
                 JobDetailsRequest jobDetailsRequest = (JobDetailsRequest) object;
 
-                JobDetailsResponse jobDetailsResponse = jobDetailsService.createJob(jobDetailsRequest);
+                JobResponse jobResponse = jobDetailsService.createJob(jobDetailsRequest);
                 return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS,
-                        ApplicationConstant.SUCCESS_200, jobDetailsResponse, null);
+                        ApplicationConstant.SUCCESS_200, jobResponse, null);
 
             } else {
                 log.error("login :: Invalid request");
@@ -90,15 +87,15 @@ public class JobController extends BaseController {
         return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS, ApplicationConstant.SUCCESS_200, transactions, null);
     }
 
-    @GetMapping("/jobs/{jobId}")
-    public APIResponse getJobDetailsById(@PathVariable String jobId, HttpServletRequest httpRequest) {
+    @GetMapping("/jobs")
+    public APIResponse getJobDetailsById(@RequestParam String jobId, HttpServletRequest httpRequest) {
         try {
             // Validate Authorization
             validateSessionId(httpRequest);
             // Fetch job details
-            JobDetails jobDetails = jobDetailsService.getJobDetailsById(jobId);
+            JobDetailsResponse  jobDetailsResponse = jobDetailsService.getJobDetailsById(jobId);
             return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS,
-                    ApplicationConstant.SUCCESS_200, jobDetails, null);
+                    ApplicationConstant.SUCCESS_200, jobDetailsResponse, null);
         } catch (Exception e) {
             log.error("Error fetching job details: {}", e.getMessage());
             return exceptionResponseGenerator.failedToProcessResponse();

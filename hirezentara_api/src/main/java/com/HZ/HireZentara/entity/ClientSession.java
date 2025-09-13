@@ -15,10 +15,10 @@ import lombok.*;
 @Data
 @Table(schema = "HIRE_ZENTARA", name = "CLIENT_SESSION")
 public class ClientSession {
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CS_SEQ")
-    @SequenceGenerator(sequenceName = "clientsession_seq", allocationSize = 1, name = "CS_SEQ")
-	private Long id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
 	@Column(name = "session_id", length=100, nullable=false)
 	private String sessionId;

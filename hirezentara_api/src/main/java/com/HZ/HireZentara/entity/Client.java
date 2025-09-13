@@ -22,10 +22,9 @@ import lombok.Data;
 public class Client extends BaseEntity   {
 	private static final long serialVersionUID = 1L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_SEQ")
-    @SequenceGenerator(sequenceName = "client_seq", allocationSize = 1, name = "client_SEQ")
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
 	@Column(name = "financial_code", length = 100)
 	private String financialCode;

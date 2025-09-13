@@ -19,10 +19,9 @@ import lombok.Data;
 @Table(schema = "HIRE_ZENTARA", name = "CLIENT_API_SECRET")
 public class ClientAPISecret 
 {
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_api_SEQ")
-    @SequenceGenerator(sequenceName = "client_api_seq", allocationSize = 1, name = "client_api_SEQ")
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 	
 	@Column(name = "tokem", length = 50, unique = true)
 	private String token;

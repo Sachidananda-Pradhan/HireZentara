@@ -74,20 +74,20 @@ public class CandidateController extends BaseController {
     }
 
 
-    // Get Job Details by Job ID
-    @GetMapping("/jobs/{jobId}")
-    public APIResponse getJobDetailsById(@PathVariable String jobId, HttpServletRequest httpRequest) {
-        try {
-            // Validate Authorization
-            Client client = validateAuthorization(httpRequest, ApplicationConstant.CANDIDATE_PORTAL);
-
-            // Fetch job details
-             JobDetails jobDetails = jobDetailsService.getJobDetailsById(jobId);
-            return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS,
-                    ApplicationConstant.SUCCESS_200, jobDetails, null);
-        } catch (Exception e) {
-            log.error("Error fetching job details: {}", e.getMessage());
-            return exceptionResponseGenerator.failedToProcessResponse();
-        }
-    }
+//    // Get Job Details by Job ID
+//    @GetMapping("/jobs/{jobId}")
+//    public APIResponse getJobDetailsById(@PathVariable String jobId, HttpServletRequest httpRequest) {
+//        try {
+//            // Validate Authorization
+//            Client client = validateAuthorization(httpRequest, ApplicationConstant.CANDIDATE_PORTAL);
+//
+//            // Fetch job details
+//             JobDetails jobDetails = jobDetailsService.getJobDetailsById(jobId);
+//            return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS,
+//                    ApplicationConstant.SUCCESS_200, jobDetails, null);
+//        } catch (Exception e) {
+//            log.error("Error fetching job details: {}", e.getMessage());
+//            return exceptionResponseGenerator.failedToProcessResponse();
+//        }
+//    }
 }

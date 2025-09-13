@@ -13,8 +13,7 @@ import java.util.List;
 public class JobDetails extends  BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "job_details_SEQ")
-    @SequenceGenerator(sequenceName = "job_details", allocationSize = 1, name = "job_details_SEQ")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "job_id", length = 50, unique = true, nullable = false)
@@ -29,23 +28,29 @@ public class JobDetails extends  BaseEntity {
     @Column(name = "location", length = 255)
     private String location;
 
-    @Column(name="roles_and_responsibilities", length = 5000)
-    private List<String> rolesAndResponsibilities;
 
-    @Column(name="skills_and_experience", columnDefinition = "CLOB")
-    private List<String> skillsAndExperience;
+    @Lob
+    @Column(name = "roles_and_responsibilities", columnDefinition = "TEXT")
+    private String rolesAndResponsibilities;
 
-    @Column(name="job_status", length = 20, nullable = false)
+    @Lob
+    @Column(name = "skills_and_experience", columnDefinition = "TEXT")
+    private String skillsAndExperience;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "job_status", length = 20, nullable = false)
     private JobStatus jobStatus;
 
-    @Column(name="posted_date", nullable = false)
+    @Column(name = "posted_date", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date postedDate;
 
-    @Column(name="closing_day_of_job", nullable = false)
-    private  Date closingDayofJob;
+    @Column(name = "closing_day_of_job", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date closingDayofJob;
 
-    @Column(name="job_link", length = 500)
-    private  String jobLink;
+    @Column(name = "job_link", length = 500)
+    private String jobLink;
 
     @OneToMany(mappedBy = "jobDetails", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Candidate> candidates;
