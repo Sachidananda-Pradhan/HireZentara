@@ -56,7 +56,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public LoginResponse login(LoginRequest loginRequest, HttpServletRequest httpRequest, Client client) {
+    public LoginResponse login( @Valid  LoginRequest loginRequest, HttpServletRequest httpRequest, Client client) {
         try {
             // 1. Validate captcha
             String sessionId = httpRequest.getHeader(ApplicationConstant.SESSION_ID);

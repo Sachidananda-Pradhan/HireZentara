@@ -5,8 +5,6 @@ import com.HZ.HireZentara.dto.request.APIRequest;
 import com.HZ.HireZentara.dto.request.CandidateRegistrationRequest;
 import com.HZ.HireZentara.dto.request.JobDetailsRequest;
 import com.HZ.HireZentara.dto.response.*;
-import com.HZ.HireZentara.entity.Client;
-import com.HZ.HireZentara.entity.JobDetails;
 import com.HZ.HireZentara.exceptions.ExceptionResponseGenerator;
 import com.HZ.HireZentara.repository.ClientSessionRepository;
 import com.HZ.HireZentara.service.IClientAPISerretService;
@@ -17,7 +15,6 @@ import com.HZ.HireZentara.utils.PortalAPIEncodeDecodeUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -50,11 +47,12 @@ public class JobController extends BaseController {
     @PostMapping("/createJob")
     public APIResponse createJob(@RequestBody @Valid APIRequest apiRequest, HttpServletRequest httpRequest)
             throws Exception {
+        log.info("Received Job Request: {}", httpRequest);
         validateSessionId(httpRequest);
         Object object = null;
         try {
             object = portalAPIEncodeDecodeUtils.decryptObject(apiRequest, JobDetailsRequest.class);
-            if (object instanceof CandidateRegistrationRequest) {
+            if (object instanceof JobDetailsRequest) {
                 JobDetailsRequest jobDetailsRequest = (JobDetailsRequest) object;
 
                 JobResponse jobResponse = jobDetailsService.createJob(jobDetailsRequest);

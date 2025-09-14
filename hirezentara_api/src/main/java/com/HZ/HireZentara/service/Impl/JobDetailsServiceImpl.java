@@ -14,6 +14,7 @@ import com.HZ.HireZentara.utils.ApplicationDateTimeUtil;
 import com.HZ.HireZentara.utils.ExcelReportGenerator;
 import com.HZ.HireZentara.utils.IDGenerator;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.Page;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class JobDetailsServiceImpl implements JobDetailsService {
 
@@ -68,6 +70,7 @@ public class JobDetailsServiceImpl implements JobDetailsService {
         jobDetailsRepository.save(jobDetails);
         JobResponse  jobResponse = new JobResponse();
         jobResponse.setJobLink(joblink);
+        jobResponse.setJobSatus(String.valueOf(jobDetails.getJobStatus()));
 
         return jobResponse;
     }
@@ -82,7 +85,7 @@ public class JobDetailsServiceImpl implements JobDetailsService {
 
                 Pageable pageable = (Pageable) PageRequest.of(page, size, sort);
                 // Fetch all jobs
-                List<JobDetails> allJobs = jobDetailsRepository.findAll();
+                List<JobDetails> allJobs = jobDetailsRepository.findAll(Sort.by("postedDate").descending());
                 // Filter by job status
                 if (!jobStatus.contains("ALL")) {
                     allJobs = allJobs.stream()
@@ -103,17 +106,20 @@ public class JobDetailsServiceImpl implements JobDetailsService {
                 if (search.isPresent()) {
                     String keyword = search.get().toLowerCase();
                     allJobs = allJobs.stream()
-                            .filter(job -> job.getJobTitle().toLowerCase().contains(keyword) ||
-                                    job.getJobDescription().toLowerCase().contains(keyword))
+                            .filter(job ->
+                            String.valueOf(job.getJobId()).contains(keyword) ||  // search by jobId
+                                    job.getJobTitle().toLowerCase().contains(keyword))// search by jobTitle
                             .collect(Collectors.toList());
                 }
                 // Apply pagination manually
                 int start = Math.toIntExact(pageable.getOffset()); // ✅ safely converts long to int
                 int end = Math.min((start + pageable.getPageSize()), allJobs.size());
-                List<JobDetails> pagedJobs = allJobs.subList(start, end);
+               // List<JobDetails> pagedJobs = allJobs.subList(start, end);
 
-            Page<JobDetails> jobPage = new PageImpl<>(pagedJobs, pageable, allJobs.size());
-           return new PageResponse((List<?>) jobPage.getContent(), jobPage.getNumber(), jobPage.getSize(), Math.toIntExact(jobPage.getTotalElements()));
+        List<JobDetails> pagedJobs = (start <= end) ? allJobs.subList(start, end) : Collections.emptyList();
+        int totalRecords = allJobs.size();
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+        return new PageResponse(pagedJobs, page, totalRecords, totalPages);
         }
 
 //    @Override

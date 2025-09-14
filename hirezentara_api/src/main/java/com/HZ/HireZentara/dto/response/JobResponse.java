@@ -8,4 +8,5 @@ import lombok.NoArgsConstructor;
 public class JobResponse {
 
     private  String  jobLink;
+    private  String jobSatus;
 }

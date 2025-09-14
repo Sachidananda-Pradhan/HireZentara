@@ -16,5 +16,4 @@ public class PageResponse {
     private int totalRecords;
     private int totalPageCount;
 
-
 }

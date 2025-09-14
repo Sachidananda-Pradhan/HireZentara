@@ -12,6 +12,6 @@ public class JobDetailsRequest {
     private String location;
     private List<String> rolesAndResponsibilities;
     private List<String> skillsAndExperience;
-    private String ExpiringDayOfJob;
+    private String expiringDayOfJob;
 
 }
