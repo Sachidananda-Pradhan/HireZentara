@@ -1,7 +1,6 @@
 package com.HZ.HireZentara.service;
 
 import com.HZ.HireZentara.dto.request.JobDetailsRequest;
-import com.HZ.HireZentara.dto.response.CandidateListResponse;
 import com.HZ.HireZentara.dto.response.JobDetailsResponse;
 import com.HZ.HireZentara.dto.response.JobResponse;
 import com.HZ.HireZentara.dto.response.PageResponse;
@@ -22,7 +21,7 @@ public interface JobDetailsService {
 
     String deleteTheJob(String jobId);
 
-    CandidateListResponse getCandidateListByJobId(String jobId, Optional<Integer> pageNumber, Optional<Integer> pageSize, boolean isRecent, Optional<Integer> days, String sortFlag, Optional<String> search);
+    PageResponse getCandidateListByJobId(String jobId, Optional<Integer> pageNumber, Optional<Integer> pageSize, boolean isRecent, Optional<Integer> days, String sortFlag, Optional<String> search, String sortBy, List<String> candidateStatus);
 
     byte[] generateAppliedCandidatesxls(String jobId);
 

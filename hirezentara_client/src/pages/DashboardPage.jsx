@@ -131,30 +131,7 @@ const DashboardPage = () => {
           <CreateJobPage onSuccess={() => setActiveModal(null)}/>
          
         </Modal>
-      )}
-
-      {activeModal === "update" && (
-        <Modal title="Update Job" onClose={() => setActiveModal(null)}>
-          <form>
-            <input type="text" placeholder="Job ID" className="w-full mb-3 px-3 py-2 border rounded" />
-            <input type="text" placeholder="New Title" className="w-full mb-3 px-3 py-2 border rounded" />
-            <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
-              Update
-            </button>
-          </form>
-        </Modal>
-      )}
-
-      {activeModal === "delete" && (
-        <Modal title="Delete Job" onClose={() => setActiveModal(null)}>
-          <form>
-            <input type="text" placeholder="Job ID to delete" className="w-full mb-3 px-3 py-2 border rounded" />
-            <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-              Delete
-            </button>
-          </form>
-        </Modal>
-      )}
+      )}  
     </div>
   );
 };

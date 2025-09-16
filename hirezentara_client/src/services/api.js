@@ -111,7 +111,7 @@ export const getAllJobs = async (sessionId, params = {}) => {
       pageNumber: 0,
       pageSize: 10,
       isRecent: true,
-      days: 10,
+      days: "",
       jobStatus: "",
       sortFlag: "",
       sortBy: "",
@@ -131,5 +131,88 @@ export const getAllJobs = async (sessionId, params = {}) => {
     throw error;
   }
 };
+
+//update Job 
+  export const updateJob = async (jobId, sessionId, days) => {
+  try {
+    const response = await axios.put(`${BASE_URL}/job/update/jobs`, '', {
+      params: { jobId, days },
+      headers: {
+        'Session-Id': sessionId
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
+//Delete Job 
+export const DeleteJobs = async (jobId, sessionId) => {
+  try {
+    const response = await axios.delete(`${BASE_URL}/job/deleteJob`, {
+      params: { jobId },
+      headers: {
+        'Session-Id': sessionId
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
+///getRegisteredCandidatesByJobId
+export const getRegisteredCandidatesByJobId = async (sessionId , jobId, params = {}) => {
+   try {
+    const defaultParams = {
+      jobId:jobId,
+      pageNumber: 0,
+      pageSize: 10,
+      isRecent: true,
+      days: "",
+      sortFlag: "",
+      search: "",
+      sortBy: "",
+      candidateStatus:"",
+    };
+
+    const queryParams = new URLSearchParams({ ...defaultParams, ...params }).toString();
+    const response = await axios.get(`${BASE_URL}/job/candidateListByJobId?${queryParams}`, {
+      headers: {
+        "Session-Id": sessionId,
+      },
+    }
+  );
+  return response.data;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
+//downloadCandidateListByJobId
+export const downloadCandidateList = async (sessionId, jobId) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/job/download-applied-candidates-by-job-id`, {
+      params: { jobId },
+      headers: {
+        'Session-Id': sessionId
+      },
+      responseType: 'blob' // 👈 This tells Axios to treat the response as binary
+    });
+    return response;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
+
+
+
+
 
 

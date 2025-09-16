@@ -1,5 +1,8 @@
 package com.HZ.HireZentara.entity;
 
+import com.HZ.HireZentara.enums.CandidateStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import jakarta.validation.constraints.NotNull;
@@ -39,14 +42,22 @@ public class Candidate extends BaseEntity{
     @Column(name = "mobile_no", length = 20, nullable = false, unique = true)
     private String mobileNo;
 
+    @Column(name = "current_location", length = 255)
+    private String currentlocation;
+
     @Column(name = "linkedin_profile", length = 255)
     private String linkedInProfile;
 
     @Column(name = "website", length = 255)
     private String website;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_details_id", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "candidate_status", length = 50, nullable = false)
+    private CandidateStatus candidateStatus;
+
+    @ManyToOne(fetch = FetchType.LAZY) // ✅ Candidate → JobDetails (many-to-one)
+    @JoinColumn(name = "job_details_id", nullable = false) // foreign key in Candidate table
+    @JsonIgnore
     private JobDetails jobDetails;
 
     @Lob

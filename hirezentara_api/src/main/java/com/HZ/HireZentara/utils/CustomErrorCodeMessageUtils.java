@@ -50,6 +50,7 @@ public class CustomErrorCodeMessageUtils {
         map.put("1020", "Login failed");
         map.put("1021", "Limit exceeded");
         map.put("1022", "Failed to process request");
+        map.put("1023", "Job is already expired or closed");
 
     }
 

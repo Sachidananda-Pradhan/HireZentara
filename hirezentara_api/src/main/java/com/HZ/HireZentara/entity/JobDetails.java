@@ -1,9 +1,11 @@
 package com.HZ.HireZentara.entity;
 
 import com.HZ.HireZentara.enums.JobStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -53,6 +55,7 @@ public class JobDetails extends  BaseEntity {
     private String jobLink;
 
     @OneToMany(mappedBy = "jobDetails", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Candidate> candidates;
+    private List<Candidate> candidates = new ArrayList<>();
+
 
 }

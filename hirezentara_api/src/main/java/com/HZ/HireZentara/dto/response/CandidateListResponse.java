@@ -1,6 +1,7 @@
 package com.HZ.HireZentara.dto.response;
 
-import com.HZ.HireZentara.dto.CandidateDto;
+
+import com.HZ.HireZentara.dto.CandidateResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,6 @@ import java.util.List;
 public class CandidateListResponse {
     private Long jobId;
     private String jobTitle;
-    private List<CandidateDto> candidates;
+    private List<CandidateResponse> candidates;
 
 }

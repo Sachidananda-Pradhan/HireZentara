@@ -56,6 +56,12 @@ public class GlobalExceptionHandler {
         APIResponse response = responseGenerator.customErrorResponse(ex.getStatusCode(), ex.getErrorMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+    @ExceptionHandler(JobExpiredException.class)
+    public ResponseEntity<APIResponse> handleJobExpiredException(JobExpiredException ex) {
+        log.error("JobExpiredException caught: {}", ex.getMessage());
+        APIResponse response = responseGenerator.customErrorResponse(ex.getStatusCode(), ex.getErrorMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
     @ExceptionHandler(UnAuthneticatedException.class)
     public ResponseEntity<APIResponse> handleUnAuthenticatedException(UnAuthneticatedException ex) {

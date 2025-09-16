@@ -81,8 +81,8 @@ public class JobController extends BaseController {
                                         @RequestParam(defaultValue = "postedDate") String sortBy,
                                         @RequestParam Optional<String> search) {
         validateSessionId(httpRequest);
-        PageResponse transactions = jobDetailsService.getAllJobDetails(pageSize, pageNumber, isRecent, days, jobStatus, sortFlag, sortBy, search);
-        return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS, ApplicationConstant.SUCCESS_200, transactions, null);
+        PageResponse allJobDetails = jobDetailsService.getAllJobDetails(pageSize, pageNumber, isRecent, days, jobStatus, sortFlag, sortBy, search);
+        return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS, ApplicationConstant.SUCCESS_200, allJobDetails, null);
     }
 
     @GetMapping("/jobs")
@@ -108,13 +108,15 @@ public class JobController extends BaseController {
                                                @RequestParam Optional<Integer> days,
                                                @RequestParam(defaultValue = "false") String sortFlag,
                                                @RequestParam Optional<String> search,
+                                               @RequestParam(defaultValue = "createdAt") String sortBy,
+                                               @RequestParam(defaultValue = "ALL") List<String> candidateStatus,
                                                HttpServletRequest httpRequest) {
         validateSessionId(httpRequest);
 
-        CandidateListResponse candidateListResponse = jobDetailsService.getCandidateListByJobId(jobId, pageNumber, pageSize, isRecent, days, sortFlag, search
+        PageResponse candidateList = jobDetailsService.getCandidateListByJobId(jobId, pageNumber, pageSize, isRecent, days, sortFlag, search,sortBy,candidateStatus
         );
 
-        return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS, ApplicationConstant.SUCCESS_200, candidateListResponse, null
+        return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS, ApplicationConstant.SUCCESS_200, candidateList, null
         );
     }
 
@@ -134,7 +136,7 @@ public class JobController extends BaseController {
         return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS, ApplicationConstant.SUCCESS_200, deleteMessage, null);
     }
 
-    @GetMapping("/downloadAllAppliedCandiate")
+    @GetMapping("/download-applied-candidates-by-job-id")
     public ResponseEntity<byte[]> getAllAppliedCandiate(@RequestParam String jobId, HttpServletRequest httpServletRequest) {
         try {
             validateSessionId(httpServletRequest);
@@ -156,10 +158,12 @@ public class JobController extends BaseController {
         return new ResponseEntity<>(xlsData, headers, HttpStatus.OK);
     }
 
-    @GetMapping("/download/resume")
-    public ResponseEntity<byte[]> downloadCandidateResume(@RequestParam String jobId, HttpServletRequest request) {
-        validateSessionId(request);
-        return jobDetailsService.downloadResume(jobId);
-    }
+//    @GetMapping("/download/resume")
+//    public ResponseEntity<byte[]> downloadCandidateResume(@RequestParam String jobId, HttpServletRequest request) {
+//        validateSessionId(request);
+//        return jobDetailsService.downloadResume(jobId);
+//    }
+
+
 }
 

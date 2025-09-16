@@ -23,7 +23,7 @@ public interface CandidateRepository extends JpaRepository<Candidate, Integer> {
 
     // DTO projection
     @Query("SELECT new com.HZ.HireZentara.dto.response.DownloadCandidateResponse(" +
-            "c.fullName, c.mobileNo, c.email, c.jobDetails.jobTitle, c.linkedInProfile) " +
+            "c.fullName, c.mobileNo, c.email,c.currentlocation, c.createdAt, c.linkedInProfile) " +
             "FROM Candidate c WHERE c.jobDetails.jobId = :jobId")
     List<DownloadCandidateResponse> findCandidateListByJobId(@Param("jobId") String jobId);
 

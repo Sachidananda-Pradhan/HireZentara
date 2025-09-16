@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { getAllJobs } from "../services/api";
 import { useDispatch, useSelector } from "react-redux";
 import { decryptPayload } from "../services/encryptionAndDecryption";
+import DeleteJob from "../pages/Jobs/Delete";
+import UpdateJob from "../pages/Jobs/Update";
+import Modal from "./Modal ";
+import { useNavigate } from "react-router-dom";
 
 const JobList = () => {
   const dispatch = useDispatch();
@@ -17,6 +21,10 @@ const JobList = () => {
   const [days, setDays] = useState("7");
   const [search, setSearch] = useState("");
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState(null);
+  const navigate = useNavigate();
 
   const fetchJobs = async (
     page = 0,
@@ -70,6 +78,15 @@ const JobList = () => {
       month: "short",
       day: "numeric",
     });
+  };
+  const handleUpdateClick = (jobId) => {
+    setSelectedJobId(jobId);
+    setShowUpdateModal(true);
+  };
+
+  const handleDeleteClick = (jobId) => {
+    setSelectedJobId(jobId);
+    setShowDeleteModal(true);
   };
 
   return (
@@ -137,6 +154,7 @@ const JobList = () => {
                       <option value="CLOSED">Closed</option>
                     </select>
                   </th> */}
+
                   <th className="text-left px-6 py-3 font-semibold ">
                     <button
                       onClick={() => setShowStatusDropdown((prev) => !prev)}
@@ -168,8 +186,13 @@ const JobList = () => {
                   </th>
 
                   <th className="text-left px-6 py-3 font-semibold">Posted</th>
-                  <th className="text-left px-6 py-3 font-semibold">Closes</th>
-                  <th className="text-left px-6 py-3 font-semibold">Link</th>
+                  <th className="text-left px-6 py-3 font-semibold">
+                    Expiring
+                  </th>
+                  <th className="text-left px-6 py-3 font-semibold">View</th>
+                  <th className="text-left px-6 py-3 font-semibold">Update</th>
+                  <th className="text-left px-6 py-3 font-semibold">Delete</th>
+                  <th className="text-left px-6 py-3 font-semibold">Candiate</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -184,7 +207,7 @@ const JobList = () => {
                     <td className="px-6 py-4 text-sm">
                       <span
                         onClick={() => setStatusFilter(job.jobStatus)}
-                        className={`font-semibold cursor-pointer underline ${
+                        className={`font-semibold cursor-pointer  ${
                           job.jobStatus === "OPEN"
                             ? "text-green-600"
                             : "text-red-600"
@@ -207,13 +230,58 @@ const JobList = () => {
                         rel="noopener noreferrer"
                         className="text-indigo-600 hover:text-indigo-800 underline"
                       >
-                        View 🔗
+                        Link🔗
                       </a>
                     </td>
+                    <td className="px-6 py-4 text-sm">
+                      <button
+                        onClick={() => handleUpdateClick(job)}
+                        className="text-blue-600 hover:underline"
+                      >
+                        ✏️
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <button
+                        onClick={() => handleDeleteClick(job.jobId)}
+                        className="text-red-600 hover:underline"
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                    <td>
+                    <h3
+  onClick={() => navigate(`/candidates/${job.jobId}`)}
+  className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700 text-sm"
+>
+  👥 Candidate List
+</h3>
+</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {showUpdateModal && (
+              <UpdateJob
+                job={selectedJobId}
+                sessionId={sessionId}
+                onClose={() => {
+                  setShowUpdateModal(false);
+                  fetchJobs(currentPage);
+                }}
+              />
+            )}
+
+            {showDeleteModal && (
+              <DeleteJob
+                jobId={selectedJobId}
+                sessionId={sessionId}
+                onClose={() => {
+                  setShowDeleteModal(false);
+                  fetchJobs(currentPage);
+                }}
+              />
+            )}
           </div>
 
           {/* Pagination Controls */}

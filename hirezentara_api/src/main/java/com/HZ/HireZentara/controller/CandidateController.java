@@ -7,6 +7,8 @@ import com.HZ.HireZentara.dto.request.APIRequest;
 import com.HZ.HireZentara.dto.request.CandidateRegistrationRequest;
 import com.HZ.HireZentara.dto.response.APIResponse;
 import com.HZ.HireZentara.dto.response.CandidateRegistrationResposne;
+import com.HZ.HireZentara.dto.response.JobDetailsResponse;
+import com.HZ.HireZentara.entity.Candidate;
 import com.HZ.HireZentara.entity.Client;
 import com.HZ.HireZentara.entity.JobDetails;
 import com.HZ.HireZentara.exceptions.ExceptionResponseGenerator;
@@ -18,9 +20,11 @@ import com.HZ.HireZentara.utils.APIResponseUtils;
 import com.HZ.HireZentara.utils.CustomErrorCodeMessageUtils;
 import com.HZ.HireZentara.utils.PortalAPIEncodeDecodeUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,60 +38,66 @@ public class CandidateController extends BaseController {
     private  final APIResponseUtils apiResponseUtils;
     private  final ExceptionResponseGenerator exceptionResponseGenerator;
     private final JobDetailsService jobDetailsService;
+    private final ObjectMapper objectMapper;
 
     public CandidateController(CandidateService candidateService, IClientAPISerretService clientDetailsService,
-                               ClientSessionRepository clientSessionRepository, CustomErrorCodeMessageUtils customCodeMessageUtils, PortalAPIEncodeDecodeUtils portalAPIEncodeDecodeUtils, APIResponseUtils apiResponseUtils, ExceptionResponseGenerator exceptionResponseGenerator, JobDetailsService jobDetailsService) {
+                               ClientSessionRepository clientSessionRepository, CustomErrorCodeMessageUtils customCodeMessageUtils, PortalAPIEncodeDecodeUtils portalAPIEncodeDecodeUtils, APIResponseUtils apiResponseUtils, ExceptionResponseGenerator exceptionResponseGenerator, JobDetailsService jobDetailsService, ObjectMapper objectMapper) {
         super(clientDetailsService, clientSessionRepository, customCodeMessageUtils);
         this.candidateService = candidateService;
         this.portalAPIEncodeDecodeUtils = portalAPIEncodeDecodeUtils;
         this.apiResponseUtils = apiResponseUtils;
         this.exceptionResponseGenerator = exceptionResponseGenerator;
         this.jobDetailsService = jobDetailsService;
+        this.objectMapper = objectMapper;
     }
 
     // Candidate Registration
-    @PostMapping("/register")
-    public APIResponse registerCandidate(@RequestBody @Valid APIRequest apiRequest, HttpServletRequest httpRequest,@RequestPart("resume") MultipartFile resume)
-            throws Exception {
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public APIResponse registerCandidate(@RequestPart("apiRequest") String  encryptedApirequest, @RequestPart("resume") MultipartFile resume,
+            HttpServletRequest httpRequest) throws Exception {
+        Client client = validateAuthorization(httpRequest, ApplicationConstant.CANDIDATE_PORTAL);
+        APIRequest apiRequest = objectMapper.readValue(encryptedApirequest, APIRequest.class);
 
-        Client client=validateAuthorization(httpRequest, ApplicationConstant.CANDIDATE_PORTAL);
-
-        Object object = null;
         try {
-            object = portalAPIEncodeDecodeUtils.decryptObject(apiRequest,CandidateRegistrationRequest.class);
+            Object object = portalAPIEncodeDecodeUtils.decryptObject(apiRequest, CandidateRegistrationRequest.class);
+
             if (object instanceof CandidateRegistrationRequest) {
-                CandidateRegistrationRequest  candidateRegistrationRequest = (CandidateRegistrationRequest) object;
+                CandidateRegistrationRequest candidateRegistrationRequest = (CandidateRegistrationRequest) object;
 
-                CandidateRegistrationResposne candidateRegistrationResposne = candidateService.registerCandidate(candidateRegistrationRequest, resume);
-                return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS,
-                        ApplicationConstant.SUCCESS_200, candidateRegistrationResposne, null);
+                CandidateRegistrationResposne candidateRegistrationResposne =
+                        candidateService.registerCandidate(candidateRegistrationRequest, resume);
 
+                return apiResponseUtils.generateExternalApiResponse(
+                        ApplicationConstant.SUCCESS,
+                        ApplicationConstant.SUCCESS_200,
+                        candidateRegistrationResposne,
+                        null
+                );
             } else {
-                log.error("Request does not contains candidate details");
+                log.error("Request does not contain candidate details");
                 return exceptionResponseGenerator.customErrorResponse(1,
-                        "Request does not contains candidate details");
+                        "Request does not contain candidate details");
             }
         } catch (JsonProcessingException e) {
-            log.error("Failed to process request : {}", e.getMessage());
+            log.error("Failed to process request: {}", e.getMessage());
             return exceptionResponseGenerator.failedToProcessResponse();
         }
     }
 
+    //get candidate by id
+    @GetMapping("/getCandidate")
+    public APIResponse getCandaiateById (@RequestParam String candidateid , HttpServletRequest httpRequest) {
+        try {
+            // Validate Authorization
+            validateSessionId(httpRequest);
+            // Fetch job details
+            Candidate  candidate  = candidateService.getCandidateById(candidateid);
+            return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS,
+                    ApplicationConstant.SUCCESS_200, candidate, null);
+        } catch (Exception e) {
+            log.error("getCandaiateById :: Failed to process request : {}", e.getMessage());
+            return exceptionResponseGenerator.failedToProcessResponse();
+        }
+    }
 
-//    // Get Job Details by Job ID
-//    @GetMapping("/jobs/{jobId}")
-//    public APIResponse getJobDetailsById(@PathVariable String jobId, HttpServletRequest httpRequest) {
-//        try {
-//            // Validate Authorization
-//            Client client = validateAuthorization(httpRequest, ApplicationConstant.CANDIDATE_PORTAL);
-//
-//            // Fetch job details
-//             JobDetails jobDetails = jobDetailsService.getJobDetailsById(jobId);
-//            return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS,
-//                    ApplicationConstant.SUCCESS_200, jobDetails, null);
-//        } catch (Exception e) {
-//            log.error("Error fetching job details: {}", e.getMessage());
-//            return exceptionResponseGenerator.failedToProcessResponse();
-//        }
-//    }
 }

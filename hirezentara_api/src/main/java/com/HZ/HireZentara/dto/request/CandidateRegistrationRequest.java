@@ -11,6 +11,7 @@ public class CandidateRegistrationRequest {
     private String email;
     private String reEnterEmail;
     private String mobileNo;
+    private String currentlocation;
     private String linkedInProfile;
     private String country;
     private String website;

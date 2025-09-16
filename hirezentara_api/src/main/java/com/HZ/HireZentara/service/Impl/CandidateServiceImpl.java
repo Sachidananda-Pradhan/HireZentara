@@ -5,6 +5,7 @@ import com.HZ.HireZentara.dto.request.CandidateRegistrationRequest;
 import com.HZ.HireZentara.dto.response.CandidateRegistrationResposne;
 import com.HZ.HireZentara.entity.Candidate;
 import com.HZ.HireZentara.entity.JobDetails;
+import com.HZ.HireZentara.enums.CandidateStatus;
 import com.HZ.HireZentara.exceptions.CandidateExistsException;
 import com.HZ.HireZentara.repository.CandidateRepository;
 import com.HZ.HireZentara.repository.JobDetailsRepository;
@@ -44,7 +45,6 @@ public class CandidateServiceImpl implements CandidateService {
         saveCandidate(candidateRegistrationRequest, resume,jobDetails);
         return new CandidateRegistrationResposne("Candidate registered successfully");
     }
-
     private void saveCandidate(CandidateRegistrationRequest candidateRegistrationRequest, MultipartFile resume,JobDetails jobDetails) {
         Candidate candidate = new Candidate();
         candidate.setFirstName(candidateRegistrationRequest.getFirstName());
@@ -53,8 +53,10 @@ public class CandidateServiceImpl implements CandidateService {
         candidate.setEmail(candidateRegistrationRequest.getEmail());
         candidate.setReEnterEmail(candidateRegistrationRequest.getReEnterEmail());
         candidate.setMobileNo(candidateRegistrationRequest.getMobileNo());
+        candidate.setCurrentlocation(candidateRegistrationRequest.getCurrentlocation());
         candidate.setLinkedInProfile(candidateRegistrationRequest.getLinkedInProfile());
         candidate.setWebsite(candidateRegistrationRequest.getWebsite());
+        candidate.setCandidateStatus(CandidateStatus.APPLIED);
         candidate.setJobDetails(jobDetails);
         candidate.setCreatedAt(new Date());
         candidate.setCreatedBy(ApplicationConstant.CANDIDATE);
@@ -69,5 +71,11 @@ public class CandidateServiceImpl implements CandidateService {
         }
         // save candidate
         candidateRepository.save(candidate);
+    }
+
+    @Override
+    public Candidate getCandidateById(String candidateid) {
+        return candidateRepository.findById((int) Long.parseLong(candidateid))
+                .orElseThrow(() -> new RuntimeException("Candidate not found"));
     }
 }

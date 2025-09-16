@@ -96,15 +96,33 @@ public class BaseController {
 	}
 
 
-	private ClientAPISecret getClientDetails(String clientName) {
-		ClientAPISecret clientDetails;
-		if(!clientName.equalsIgnoreCase(ApplicationConstant.ADMIN)) {
-			clientDetails = clientDetailsService.findByClientName(clientName);
-		}else {
-			clientDetails = clientDetailsService.findByClientType(ClientType.ADMIN);
-		}
-		return clientDetails;
-	}
+//	private ClientAPISecret getClientDetails(String clientName) {
+//		ClientAPISecret clientDetails;
+//		if(!clientName.equalsIgnoreCase(ApplicationConstant.ADMIN)) {
+//			clientDetails = clientDetailsService.findByClientName(clientName);
+//		}else {
+//			clientDetails = clientDetailsService.findByClientType(ClientType.ADMIN);
+//		}
+//		return clientDetails;
+//	}
+private ClientAPISecret getClientDetails(String clientName) {
+    if (clientName == null || clientName.isBlank()) {
+        throw new IllegalArgumentException("Client name must not be null or empty");
+    }
+    ClientAPISecret clientDetails;
+    switch (clientName.toUpperCase()) {
+        case ApplicationConstant.ADMIN:
+            clientDetails = clientDetailsService.findByClientType(ClientType.ADMIN);
+            break;
+        case ApplicationConstant.CANDIDATE_PORTAL:
+            clientDetails = clientDetailsService.findByClientType(ClientType.CANDIDATE);
+            break;
+        default:
+            clientDetails = clientDetailsService.findByClientName(clientName);
+            break;
+    }
+    return clientDetails;
+}
 	
 	
 	private ClientSession getClientSessionAndCheckTokenExists(String encryptedToken) {

@@ -51,9 +51,11 @@ public class ApplicationConstant {
     public static final String CANDIDATE_NAME = "CandidateName";
     public static final String MOBILE_NUMBER = "Mobile Number";
     public static final String EMAIL_ID = "Email_id";
-    public static final String LOCATION = "Location";
+    public static final String CURRENT_LOCATION = "Current_Location";
     public static final String JOB_TITLE = "Job_title";
+    public static final String APPLIED_DATE = "Applied Date";
     public static final String LINKEDIN_PROFILE = "LinkedIn Profile";
+    public static final String JOB_EXPIRY_UPDATE_MESSAGE = "Job expiry updated to: ";
 
     //error codes
     public static final int HZ_196 = 196;
@@ -71,6 +73,8 @@ public class ApplicationConstant {
     public static final int HZ_1019 = 1019;
     public static final int HZ_1020 = 1020;
     public static final int HZ_1021 = 1021;
+    public static final int HZ_1022 = 1022;
+    public static final int HZ_1023 = 1023;
 
 
 
@@ -86,5 +90,7 @@ public class ApplicationConstant {
             'e', 'f', 'g', 'h', 'k', 'i','j','k','l','m', 'n', 'o','p','q', 'r', 's','t','u','v','w', 'x', 'y','z',
             '0','1','2', '3', '4', '5', '6', '7', '8','9' };
     public static final String FORMAT_TYPE = "png";
+
+
 
 }

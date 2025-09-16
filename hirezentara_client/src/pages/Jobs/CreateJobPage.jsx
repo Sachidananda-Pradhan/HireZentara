@@ -55,7 +55,7 @@ const CreateJobPage = ({onSuccess}) => {
         <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} className="w-full p-2 border rounded" />
         <textarea type="text" name="rolesAndResponsibilities" placeholder="Roles & Responsibilities (comma separated)" value={formData.rolesAndResponsibilities} onChange={(e) => setFormData({ ...formData, rolesAndResponsibilities: e.target.value.split(",") })} className="w-full p-2 border rounded" />
         <textarea type="text" name="skillsAndExperience" placeholder="Skills & Experience (comma separated)" value={formData.skillsAndExperience} onChange={(e) => setFormData({ ...formData, skillsAndExperience: e.target.value.split(",") })} className="w-full p-2 border rounded" />
-        <input type="text" name="expiringDayOfJob" placeholder="days" value={formData.expiringDayOfJob} onChange={handleChange} className="w-full p-2 border rounded" />
+        <input type="text" name="expiringDayOfJob" placeholder="job expiring days" value={formData.expiringDayOfJob} onChange={handleChange} className="w-full p-2 border rounded" />
 
         <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
           Create Post

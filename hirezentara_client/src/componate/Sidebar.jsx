@@ -42,8 +42,8 @@ import React from "react";
 const Sidebar = ({ isCollapsed, toggleSidebar, setActiveModal }) => {
   const menuItems = [
     { icon: '🧾', label: 'CreatePost', action: () => setActiveModal('create') },
-    { icon: '✏️', label: 'Update', action: () => setActiveModal('update') },
-    { icon: '🗑️', label: 'DeleteJob', action: () => setActiveModal('delete') },
+    // { icon: '✏️', label: 'Update', action: () => setActiveModal('update') },
+    // { icon: '🗑️', label: 'DeleteJob', action: () => setActiveModal('delete') },
   ];
 
   return (
