@@ -36,16 +36,18 @@ public class AdminController  extends BaseController {
     private  final APIResponseUtils apiResponseUtils;
     private  final PortalAPIEncodeDecodeUtils portalAPIEncodeDecodeUtils;
     private  final CustomErrorCodeMessageUtils customErrorCodeMessageUtils;
+    private  final  IClientAPISerretService clientDetailsService;
 
     public AdminController(AdminService adminService,
                            IClientAPISerretService clientDetailsService,
-                           ClientSessionRepository clientSessionRepository,ExceptionResponseGenerator exceptionResponseGenerator, APIResponseUtils apiResponseUtils, PortalAPIEncodeDecodeUtils portalAPIEncodeDecodeUtils, CustomErrorCodeMessageUtils customErrorCodeMessageUtils) {
+                           ClientSessionRepository clientSessionRepository, ExceptionResponseGenerator exceptionResponseGenerator, APIResponseUtils apiResponseUtils, PortalAPIEncodeDecodeUtils portalAPIEncodeDecodeUtils, CustomErrorCodeMessageUtils customErrorCodeMessageUtils, IClientAPISerretService iClientAPISerretService) {
         super( clientDetailsService, clientSessionRepository,customErrorCodeMessageUtils);
         this.adminService = adminService;
         this.exceptionResponseGenerator = exceptionResponseGenerator;
         this.apiResponseUtils = apiResponseUtils;
         this.portalAPIEncodeDecodeUtils = portalAPIEncodeDecodeUtils;
         this.customErrorCodeMessageUtils = customErrorCodeMessageUtils;
+        this.clientDetailsService = clientDetailsService;
     }
 
     @PostMapping("/login")

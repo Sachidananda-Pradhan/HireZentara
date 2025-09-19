@@ -1,8 +1,10 @@
 package com.HZ.HireZentara.service;
 
+import com.HZ.HireZentara.dto.CandidateResponse;
+import com.HZ.HireZentara.dto.request.CandidateInterviewSchedulerRequest;
 import com.HZ.HireZentara.dto.request.CandidateRegistrationRequest;
+import com.HZ.HireZentara.dto.response.CandidateAndJobDetailsResponse;
 import com.HZ.HireZentara.dto.response.CandidateRegistrationResposne;
-import com.HZ.HireZentara.entity.Candidate;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,5 +14,13 @@ public interface CandidateService {
 
     CandidateRegistrationResposne registerCandidate(@Valid CandidateRegistrationRequest candidateRegistrationRequest, MultipartFile resume);
 
-    Candidate getCandidateById(String candidateid);
+    CandidateAndJobDetailsResponse getCandidateById(String candidateId);
+
+    String deleteCandidateById(String candidateId);
+
+    String updateCandidateStatus(String candidateId, String status);
+
+    String scheduleInterview(CandidateInterviewSchedulerRequest candidateInterviewSchedulerRequest, String candidateId);
+
+    String cancelInterview(String candidateId, Long interviewId);
 }

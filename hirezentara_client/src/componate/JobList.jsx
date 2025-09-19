@@ -192,7 +192,9 @@ const JobList = () => {
                   <th className="text-left px-6 py-3 font-semibold">View</th>
                   <th className="text-left px-6 py-3 font-semibold">Update</th>
                   <th className="text-left px-6 py-3 font-semibold">Delete</th>
-                  <th className="text-left px-6 py-3 font-semibold">Candiate</th>
+                  <th className="text-left px-6 py-3 font-semibold">
+                    Candiate
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -250,13 +252,13 @@ const JobList = () => {
                       </button>
                     </td>
                     <td>
-                    <h3
-  onClick={() => navigate(`/candidates/${job.jobId}`)}
-  className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700 text-sm"
->
-  👥 Candidate List
-</h3>
-</td>
+                      <h3
+                        onClick={() => navigate(`/candidates/${job.jobId}`)}
+                        className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700 text-sm"
+                      >
+                        👥 Candidate List
+                      </h3>
+                    </td>
                   </tr>
                 ))}
               </tbody>

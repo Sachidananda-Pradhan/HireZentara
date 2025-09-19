@@ -195,6 +195,7 @@ public class JobDetailsServiceImpl implements JobDetailsService {
             // Map to DTOs
             List<CandidateResponse> candidateResponse = pagedCandidates.stream()
                     .map(candidate -> new CandidateResponse(
+                            candidate.getId(),
                             candidate.getFullName(),
                             candidate.getEmail(),
                             candidate.getCreatedAt(),

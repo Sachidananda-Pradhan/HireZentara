@@ -2,6 +2,7 @@ package com.HZ.HireZentara.entity;
 
 import com.HZ.HireZentara.enums.JobStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Data
 @Table(schema = "HIRE_ZENTARA", name = "JOB_DETAILS")

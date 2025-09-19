@@ -210,6 +210,42 @@ export const downloadCandidateList = async (sessionId, jobId) => {
   }
 };
 
+// delete the candiate 
+export const deleteCandidateById = async (sessionId,candidateId) => {
+  //debugger
+  try {
+    const response = await axios.delete(`${BASE_URL}/candidates/deleteCandidate`, {
+      params: {candidateId},
+      headers: {
+        'Session-Id': sessionId
+      },
+      }
+  );
+    return response;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
+// get candiate details
+
+export const getCandidateByJobId = async (sessionId,candidateId) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/candidates/getCandidate`, {
+      params: {candidateId},
+      headers: {
+        'Session-Id': sessionId
+      },
+      }
+  );
+    return response;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
 
 
 
