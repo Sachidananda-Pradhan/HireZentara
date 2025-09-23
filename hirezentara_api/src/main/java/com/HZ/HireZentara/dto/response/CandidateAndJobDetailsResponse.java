@@ -11,7 +11,7 @@ public class CandidateAndJobDetailsResponse {
     private String name;
     private String email;
     private Date appliedDate;
-    private CandidateStatus CandidateStatus;
+    private CandidateStatus candidateStatus;
     private String currentLocation;
     private String resume;
     private String mobileNo;

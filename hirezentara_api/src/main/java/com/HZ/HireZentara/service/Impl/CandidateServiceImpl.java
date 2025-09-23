@@ -1,11 +1,11 @@
 package com.HZ.HireZentara.service.Impl;
 
 import com.HZ.HireZentara.constant.ApplicationConstant;
-import com.HZ.HireZentara.dto.CandidateResponse;
 import com.HZ.HireZentara.dto.request.CandidateInterviewSchedulerRequest;
 import com.HZ.HireZentara.dto.request.CandidateRegistrationRequest;
 import com.HZ.HireZentara.dto.response.CandidateAndJobDetailsResponse;
 import com.HZ.HireZentara.dto.response.CandidateRegistrationResposne;
+import com.HZ.HireZentara.dto.response.InterviewDetailsResponse;
 import com.HZ.HireZentara.entity.Candidate;
 import com.HZ.HireZentara.entity.InterviewDetails;
 import com.HZ.HireZentara.entity.JobDetails;
@@ -21,8 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Base64;
-import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Locale.filter;
 
 @Service
 public class CandidateServiceImpl implements CandidateService {
@@ -120,16 +122,16 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     @Override
-    public String updateCandidateStatus(String candidateId, String status) {
+    public String updateCandidateStatus(String candidateId, String candidateStatus) {
         Candidate candidate = candidateRepository.findById((int) Long.parseLong(candidateId))
                 .orElseThrow(() -> new RuntimeException("Candidate not found"));
         try {
-            CandidateStatus candidateStatus = CandidateStatus.valueOf(status.toUpperCase());
-            candidate.setCandidateStatus(candidateStatus);
+            CandidateStatus statustatus = CandidateStatus.valueOf(candidateStatus.toUpperCase());
+            candidate.setCandidateStatus(statustatus);
             candidateRepository.save(candidate);
             return "Candidate status updated successfully to " + candidateStatus;
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid status value: " + status);
+            throw new RuntimeException("Invalid status value: " + candidateStatus);
         }
     }
 
@@ -166,7 +168,7 @@ public class CandidateServiceImpl implements CandidateService {
 
 
     private void saveInterviewDetails(CandidateInterviewSchedulerRequest candidateInterviewSchedulerRequest, Candidate candidate, String meetingLink) {
-        candidate.setCandidateStatus(CandidateStatus.INTERVIEW_SCHEDULED);
+        candidate.setCandidateStatus(CandidateStatus.TECHNICAL_INTERVIEW);
         candidateRepository.save(candidate);
         // Here, you might want to create an Interview entity to store interview details
         InterviewDetails interviewDetails = new InterviewDetails();
@@ -179,7 +181,59 @@ public class CandidateServiceImpl implements CandidateService {
         interviewDetails.setInterviewType(candidateInterviewSchedulerRequest.getInterviewtype());
         interviewDetails.setMeetingPlatform(candidateInterviewSchedulerRequest.getMeetingPlatform());
         interviewDetails.setCandidate(candidate);
+        interviewDetails.setIsCancelled(false);
+        interviewDetails.setCreatedAt(new Date());
+        interviewDetails.setCreatedBy(ApplicationConstant.ADMIN);
         interviewRepository.save(interviewDetails);
+    }
+
+
+    @Override
+    public List<InterviewDetailsResponse> getInterviewSlots(String candidateId) {
+        Candidate candidate = candidateRepository.findById(Integer.valueOf(candidateId))
+                .orElseThrow(() -> new RuntimeException("Candidate not found"));
+        List<InterviewDetails> interviewDetailsList  = interviewRepository.findInterviewByCandidateId(Long.parseLong(String.valueOf(Integer.valueOf(candidateId))));
+
+        if (interviewDetailsList == null || interviewDetailsList.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return interviewDetailsList.stream()
+                .filter(i -> i.getCandidate().getId().equals(candidate.getId()))
+                .sorted(Comparator.comparing(InterviewDetails::getInterviewDate))
+                .map(interview -> {
+                    InterviewDetailsResponse response = new InterviewDetailsResponse();
+                    response.setInterviewId(String.valueOf(interview.getId()));
+                    response.setInterviewRound(interview.getInterviewRound());
+                    response.setInterviewDate(interview.getInterviewDate());
+                    response.setInterviewStartTime(interview.getInterviewStartTime());
+                    response.setInterviewEndTime(interview.getInterviewEndTime());
+                    response.setInterviewerName(interview.getInterviewerName());
+                    response.setInterviewerEmail(interview.getInterviewerEmail());
+                    response.setInterviewType(interview.getInterviewType());
+                    response.setInterviewFeedback(interview.getInterviewFeedback());
+                    response.setMeetingPlatform(interview.getMeetingPlatform());
+                    response.setCandidateId(candidateId);
+                    response.setCandidateName(candidate.getFullName());
+                    response.setIsCancelled(interview.getIsCancelled());
+                    response.setCreatedAt(interview.getCreatedAt());
+                    response.setCancelledAt(interview.getCancelledAt());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public InterviewDetails getInterviewDetails(String candidateId, Long interviewId) {
+        Candidate candidate = candidateRepository.findById((int) Long.parseLong(candidateId))
+                .orElseThrow(() -> new RuntimeException("Candidate not found"));
+        InterviewDetails interviewDetails = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new RuntimeException("Interview not found"));
+        if (!interviewDetails.getCandidate().getId().equals(candidate.getId())) {
+            throw new RuntimeException("Interview does not belong to the specified candidate");
+        }else {
+            return interviewDetails;
+        }
     }
 
     @Override
@@ -191,13 +245,9 @@ public class CandidateServiceImpl implements CandidateService {
         if (!interviewDetails.getCandidate().getId().equals(candidate.getId())) {
             throw new RuntimeException("Interview does not belong to the specified candidate");
         }
-        deleteInterview(interviewDetails.getId());
+        interviewDetails.setIsCancelled(true);
+        interviewDetails.setCancelledAt(new Date());
+        interviewRepository.save(interviewDetails);
         return "Interview cancelled successfully for candidate: " + candidate.getFullName();
     }
-
-    private void deleteInterview(Long id) {
-        interviewRepository.deleteById(id);
-    }
-
-
 }

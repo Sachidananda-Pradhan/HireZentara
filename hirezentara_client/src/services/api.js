@@ -246,6 +246,86 @@ export const getCandidateByJobId = async (sessionId,candidateId) => {
   }
 };
 
+// update Candiate status
+
+export const updateCandidateStatus = async (sessionId,candidateId,newStatus) => {
+  try {
+    const response = await axios.put(`${BASE_URL}/candidates/updateCandidateStatus`,{}, 
+      {
+        params: {
+          candidateId,
+          candidateStatus: newStatus // match your curl param name
+        },
+        headers: {
+          'Session-Id': sessionId
+        }
+      }
+  );
+    return response;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
+export const scheduleInterview = async (sessionId, candidateId, encryptedRequestData) => {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/candidates/scheduleInterview`,
+      { encryptedRequestData },  // here it’s only string now
+      {
+        params: { candidateId },
+        headers: {
+          "Session-Id": sessionId,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
+
+
+export const getInterviewSlots = async (sessionId,candidateId) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/candidates/interviewSlots`,
+      {
+        params: {candidateId},
+        headers: {
+          'Session-Id': sessionId
+        }
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
+export const cancelInterview = async (sessionId,candidateId,interviewId) => {
+  try {
+    const response = await axios.delete(
+      `${BASE_URL}/candidates/cancelInterview`,
+      {
+        params: {candidateId,interviewId},
+        headers: {
+          'Session-Id': sessionId
+        }
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
 
 
 

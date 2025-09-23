@@ -8,7 +8,7 @@ import java.util.Date;
 @Entity
 @Data
 @Table( schema = "HIRE_ZENTARA", name = "INTERVIEW_DETAILS")
-public class InterviewDetails {
+public class InterviewDetails extends  BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,6 +45,10 @@ public class InterviewDetails {
     @JoinColumn(name = "candidate_id", nullable = false) // foreign key in InterviewDetails table
     private Candidate candidate;
 
+    @Column(name = "is_cancelled")
+    private Boolean isCancelled;
 
+    @Column(name = "cancelled_at")
+    private  Date cancelledAt;
 
 }

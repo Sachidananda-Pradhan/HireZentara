@@ -119,6 +119,7 @@ const CandidateListBoard = () => {
     setSelectedCandidateId(candidateId);
     setShowDeleteModal(true);
   };
+  
 
   return (
     <main className="p-10 bg-gray-50">
@@ -283,7 +284,8 @@ const CandidateListBoard = () => {
               <td className="px-6 py-4 text-sm">
                 <button
                   onClick={() => navigateToDashboard(c.candidateId)} // Replace with your routing logic
-                  className="text-blue-600 hover:underline flex items-center"
+                  className="text-blue-600 hover:underline flex items-center"  
+                  
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
