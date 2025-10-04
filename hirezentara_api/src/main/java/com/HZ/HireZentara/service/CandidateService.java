@@ -32,4 +32,8 @@ public interface CandidateService {
     List<InterviewDetailsResponse> getInterviewSlots(String candidateId);
 
     InterviewDetails getInterviewDetails(String candidateId, Long interviewId);
+
+    String reScheduleInterview(CandidateInterviewSchedulerRequest candidateInterviewSchedulerRequest, String candidateId, Long interviewId);
+
+    String updateCandidateImage(String candidateId, MultipartFile candidateImage);
 }

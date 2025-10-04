@@ -64,4 +64,8 @@ public class Candidate extends BaseEntity{
     @Column(name = "resume", nullable = false)
     private byte[] resume;
 
+    @Lob
+    @Column(name = "candidate_image")
+    private  byte[] candidateImage;
+
 }

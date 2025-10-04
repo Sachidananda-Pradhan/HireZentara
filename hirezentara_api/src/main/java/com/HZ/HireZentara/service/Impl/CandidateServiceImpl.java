@@ -10,6 +10,7 @@ import com.HZ.HireZentara.entity.Candidate;
 import com.HZ.HireZentara.entity.InterviewDetails;
 import com.HZ.HireZentara.entity.JobDetails;
 import com.HZ.HireZentara.enums.CandidateStatus;
+import com.HZ.HireZentara.enums.InterviewStatus;
 import com.HZ.HireZentara.exceptions.CandidateExistsException;
 import com.HZ.HireZentara.repository.CandidateRepository;
 import com.HZ.HireZentara.repository.InterviewRepository;
@@ -90,10 +91,30 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     @Override
+    public String updateCandidateImage(String candidateId, MultipartFile candidateImage) {
+        Candidate candidate = candidateRepository.findById((int) Long.parseLong(candidateId))
+                .orElseThrow(() -> new RuntimeException("Candidate not found"));
+        // handle file upload if needed
+        if (candidateImage != null && !candidateImage.isEmpty()) {
+            try {
+                candidate.setCandidateImage(candidateImage.getBytes()); // if you want to store in DB
+                candidate.setUpdatedAt(new Date());
+                candidate.setUpdatedBy(ApplicationConstant.CANDIDATE);
+            } catch (IOException e) {
+                throw new RuntimeException("Error saving candidate image file", e);
+            }
+        }
+
+        candidateRepository.save(candidate);
+        return "Candidate image updated successfully for candidate: " + candidate.getFullName();
+    }
+
+    @Override
     public CandidateAndJobDetailsResponse getCandidateById(String candidateId) {
         Candidate candidate = candidateRepository.findById(Integer.valueOf(candidateId))
                 .orElseThrow(() -> new RuntimeException("Candidate not found"));
-
+         byte[] candidateImage = candidate.getCandidateImage();
+         String candidateImageBase64 = Base64.getEncoder().encodeToString(candidateImage);
         CandidateAndJobDetailsResponse candidateAndJobDetailsResponse = new CandidateAndJobDetailsResponse();
         candidateAndJobDetailsResponse.setCandidateId(candidate.getId());
         candidateAndJobDetailsResponse.setName(candidate.getFullName());
@@ -105,6 +126,7 @@ public class CandidateServiceImpl implements CandidateService {
         candidateAndJobDetailsResponse.setMobileNo(candidate.getMobileNo());
         candidateAndJobDetailsResponse.setLinkedInProfile(candidate.getLinkedInProfile());
         candidateAndJobDetailsResponse.setJobTitle(candidate.getJobDetails().getJobTitle());
+        candidateAndJobDetailsResponse.setCandidateImage(candidateImageBase64);
         //candidateAndJobDetailsResponse.setExperience(candidate.getJobDetails().getExperience());
         //candidateAndJobDetailsResponse.setAvailabilityNoticePeriod(candidate.getJobDetails().getAvailabilityNoticePeriod());
 
@@ -182,6 +204,7 @@ public class CandidateServiceImpl implements CandidateService {
         interviewDetails.setMeetingPlatform(candidateInterviewSchedulerRequest.getMeetingPlatform());
         interviewDetails.setCandidate(candidate);
         interviewDetails.setIsCancelled(false);
+        interviewDetails.setInterviewStatus(InterviewStatus.SCHEDULED);
         interviewDetails.setCreatedAt(new Date());
         interviewDetails.setCreatedBy(ApplicationConstant.ADMIN);
         interviewRepository.save(interviewDetails);
@@ -218,6 +241,7 @@ public class CandidateServiceImpl implements CandidateService {
                     response.setIsCancelled(interview.getIsCancelled());
                     response.setCreatedAt(interview.getCreatedAt());
                     response.setCancelledAt(interview.getCancelledAt());
+                    response.setInterviewStatus(interview.getInterviewStatus());
                     return response;
                 })
                 .collect(Collectors.toList());
@@ -237,6 +261,52 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     @Override
+    public String reScheduleInterview(CandidateInterviewSchedulerRequest candidateInterviewSchedulerRequest, String candidateId, Long interviewId) {
+        Candidate candidate = candidateRepository.findById((int) Long.parseLong(candidateId))
+                .orElseThrow(() -> new RuntimeException("Candidate not found"));
+        InterviewDetails interviewDetails = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new RuntimeException("Interview details  not found"));
+        if (!interviewDetails.getCandidate().getId().equals(candidate.getId())) {
+            throw new RuntimeException("Interview does not belong to the specified candidate");
+        }
+        String meetingLink;
+        switch (candidateInterviewSchedulerRequest.getMeetingPlatform().toLowerCase()) {
+            case "google meet":
+                meetingLink = meetEventCreation.createGoogleMeetEvent(candidateInterviewSchedulerRequest);
+                break;
+
+            case "microsoft teams":
+                meetingLink = meetEventCreation.createMicrosoftTeamsEvent(candidateInterviewSchedulerRequest);
+                break;
+
+            case "zoom":
+                meetingLink = meetEventCreation.createZoomMeeting(candidateInterviewSchedulerRequest);
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported meeting platform: " + candidateInterviewSchedulerRequest.getMeetingPlatform());
+        }
+        // Update interview details
+        interviewDetails.setInterviewRound(candidateInterviewSchedulerRequest.getInterviewRound());
+        interviewDetails.setInterviewDate(candidateInterviewSchedulerRequest.getInterviewDate());
+        interviewDetails.setInterviewStartTime(candidateInterviewSchedulerRequest.getInterviewStartTime());
+        interviewDetails.setInterviewEndTime(candidateInterviewSchedulerRequest.getInterviewEndTime());
+        interviewDetails.setInterviewerName(candidateInterviewSchedulerRequest.getInterviewName());
+        interviewDetails.setInterviewerEmail(candidateInterviewSchedulerRequest.getInterviewEmail());
+        interviewDetails.setInterviewType(candidateInterviewSchedulerRequest.getInterviewtype());
+        interviewDetails.setMeetingPlatform(candidateInterviewSchedulerRequest.getMeetingPlatform());
+        interviewDetails.setInterviewStatus(InterviewStatus.RESCHEDULED);
+        interviewDetails.setUpdatedAt(new Date());
+        interviewDetails.setUpdatedBy(ApplicationConstant.ADMIN);
+        interviewRepository.save(interviewDetails);
+        // Send Email Notification
+        sendEmailUtils.sendInterviewEmail(candidateInterviewSchedulerRequest,candidate, meetingLink);
+
+            return "Interview rescheduled successfully on " + candidateInterviewSchedulerRequest.getMeetingPlatform() +
+                    " with link: " + meetingLink;
+    }
+
+    @Override
     public String cancelInterview(String candidateId, Long interviewId) {
         Candidate candidate = candidateRepository.findById((int) Long.parseLong(candidateId))
                 .orElseThrow(() -> new RuntimeException("Candidate not found"));
@@ -245,6 +315,7 @@ public class CandidateServiceImpl implements CandidateService {
         if (!interviewDetails.getCandidate().getId().equals(candidate.getId())) {
             throw new RuntimeException("Interview does not belong to the specified candidate");
         }
+        interviewDetails.setInterviewStatus(InterviewStatus.CANCELLED);
         interviewDetails.setIsCancelled(true);
         interviewDetails.setCancelledAt(new Date());
         interviewRepository.save(interviewDetails);

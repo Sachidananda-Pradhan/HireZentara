@@ -20,4 +20,5 @@ public class CandidateAndJobDetailsResponse {
     private String experience;
     private String expectedSalary;
     private String availabilityNoticePeriod;
+    private String candidateImage;
 }

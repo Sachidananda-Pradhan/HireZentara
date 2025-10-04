@@ -87,6 +87,22 @@ public class CandidateController extends BaseController {
         }
     }
 
+    //update candidate image
+    @PutMapping(value = "/updateCandidateImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public APIResponse updateCandidateImage(@RequestParam("candidateId") String candidateId,
+                                            @RequestPart("candidateImage") MultipartFile candidateImage,
+                                            HttpServletRequest httpRequest) {
+        Client client = validateAuthorization(httpRequest, ApplicationConstant.CANDIDATE_PORTAL);
+        try {
+            String response = candidateService.updateCandidateImage(candidateId, candidateImage);
+            return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS,
+                    ApplicationConstant.SUCCESS_200, response, null);
+        } catch (Exception e) {
+            log.error("updateCandidateImage :: Failed to process request : {}", e.getMessage());
+            return exceptionResponseGenerator.failedToProcessResponse();
+        }
+    }
+
     //get candidate by id
     @GetMapping("/getCandidate")
     public APIResponse getCandaiateById(@RequestParam String candidateId, HttpServletRequest httpRequest) {
@@ -174,31 +190,31 @@ public class CandidateController extends BaseController {
         }
     }
 
-//    @PutMapping("reScheduleInterview")
-//    public APIResponse reScheduleInterview(@RequestBody APIRequest apiRequest,@RequestParam String candidateId, HttpServletRequest httpRequest,Long interviewId) {
-//        try {
-//            validateSessionId(httpRequest);
-//            try {
-//                Object object = portalAPIEncodeDecodeUtils.decryptObject(apiRequest, CandidateInterviewSchedulerRequest.class);
-//
-//                if (object instanceof CandidateRegistrationRequest) {
-//                    CandidateInterviewSchedulerRequest candidateInterviewSchedulerRequest = (CandidateInterviewSchedulerRequest) object;
-//                    String scheduleInterviewResponse = candidateService.reScheduleInterview(candidateInterviewSchedulerRequest, candidateId, interviewId);
-//                    return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS, ApplicationConstant.SUCCESS_200, scheduleInterviewResponse, null
-//                    );
-//                } else {
-//                    log.error("Request does not contain candidate details");
-//                    return exceptionResponseGenerator.customErrorResponse(1,
-//                            "Request does not contain candidate details");
-//                }
-//            } catch (JsonProcessingException e) {
-//                log.error("Failed to process request: {}", e.getMessage());
-//                return exceptionResponseGenerator.failedToProcessResponse();
-//            }
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+    @PutMapping("reScheduleInterview")
+    public APIResponse reScheduleInterview(@RequestBody APIRequest apiRequest,@RequestParam String candidateId, HttpServletRequest httpRequest,Long interviewId) {
+        try {
+            validateSessionId(httpRequest);
+            try {
+                Object object = portalAPIEncodeDecodeUtils.decryptObject(apiRequest, CandidateInterviewSchedulerRequest.class);
+
+                if (object instanceof CandidateInterviewSchedulerRequest) {
+                    CandidateInterviewSchedulerRequest candidateInterviewSchedulerRequest = (CandidateInterviewSchedulerRequest) object;
+                    String scheduleInterviewResponse = candidateService.reScheduleInterview(candidateInterviewSchedulerRequest, candidateId, interviewId);
+                    return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS, ApplicationConstant.SUCCESS_200, scheduleInterviewResponse, null
+                    );
+                } else {
+                    log.error("Request does not contain candidate details");
+                    return exceptionResponseGenerator.customErrorResponse(1,
+                            "Request does not contain candidate details");
+                }
+            } catch (JsonProcessingException e) {
+                log.error("Failed to process request: {}", e.getMessage());
+                return exceptionResponseGenerator.failedToProcessResponse();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @GetMapping("getInterviewDetails")
     public APIResponse getInterviewDetails(@RequestParam String candidateId, @RequestParam Long interviewId, HttpServletRequest httpRequest) {

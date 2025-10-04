@@ -1,13 +1,19 @@
 import React, { useState } from "react";
-import {CiCalendar,CiLink,CiLocationOn,CiMail,CiPhone,CiUser,} from "react-icons/ci";
+import {
+  CiCalendar,
+  CiLink,
+  CiLocationOn,
+  CiMail,
+  CiPhone,
+  CiUser,
+} from "react-icons/ci";
 import UpdateCandidateStatus from "./UpdateCandiateStatus";
 import { FaBriefcase, FaClock, FaMoneyBillWave } from "react-icons/fa";
 import InterviewScheduleModal from "./InterView/InterviewScheduleModal";
 
-
 const CandidateOverview = ({ candidateData, onStatusUpdated }) => {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-   const [newMeeting, setNewMeeting] = useState({ // also define newMeeting here
+  const [newMeeting, setNewMeeting] = useState({
     interviewtype: "",
     interviewRound: "",
     interviewDate: "",
@@ -22,51 +28,72 @@ const CandidateOverview = ({ candidateData, onStatusUpdated }) => {
   const handleMeetingScheduled = (meeting) => {
     console.log("Meeting scheduled:", meeting);
     setShowScheduleModal(false);
-    // optionally update state or refresh interviews
   };
+
   return (
-    <div className="flex-1 overflow-auto bg-gray-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-white via-blue-50 to-purple-50 shadow-lg border-b border-gray-200 px-8 py-8 sticky top-0 z-[999]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 ">
+      {/* Candidate Header Card - Sticky */}
+      <div className="bg-gradient-to-r  from-white via-blue-50 to-purple-50 shadow-lg rounded-2xl border-b border-gray-200  sticky top-0 z-40 ">
+        {/* gap-4 px-5 py-3 p-5   */}
+        <div className="flex items-center justify-between flex-wrap gap-4  ">
+          <div className="flex items-center space-x-2 p-3">
             {/* Avatar */}
-            <div className="relative">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl ring-4 ring-white">
-                {candidateData?.name?.[0] || "C"}
-              </div>
-              <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-white shadow-lg">
-                <div className="w-full h-full bg-green-400 rounded-full animate-pulse"></div>
-              </div>
+            <div className="relative ml-1">
+              <img
+                src={
+                  candidateData?.candidateImage
+                    ? `data:image/jpeg;base64,${candidateData.candidateImage}`
+                    : "/default-avatar.png"
+                }
+                alt={candidateData?.name || "Candidate"}
+                className="w-50 h-50 rounded-2xl shadow-xl ring-4 ring-white object-cover"
+              />
             </div>
-            {/* Status Update */}
+            <div className="mb-27">
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                {candidateData?.name || "Unknown Candidate"}
+              </h1>
+              <p className="text-gray-600 text-lg">
+                {candidateData?.jobTitle || "Position Not Specified"}
+              </p>
+            </div>
+          </div>
+          {/* Schedule Interview + Status */}
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setShowScheduleModal(true)}
+              className="absolute top-5 right-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 flex items-center space-x-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold"
+            >
+              <CiCalendar className="w-5 h-5" />
+              <span>Schedule Interview</span>
+            </button>
+          </div>
+          {/* Status Dropdown */}
+          <div className="absolute bottom-4 right-0 flex justify-end items-center gap-3 ">
+            <label className="text-sm font-medium mb-1  bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl px-4 py-2">
+              Update Candidate Progress Status
+            </label>
             <UpdateCandidateStatus
               candidateData={candidateData}
               onStatusUpdated={onStatusUpdated}
             />
           </div>
-          {/* Schedule Interview Button */}
-          <button
-            onClick={() => setShowScheduleModal(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 flex items-center space-x-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold"
-          >
-            <CiCalendar className="w-5 h-5" />
-            <span>Schedule Interview</span>
-          </button>
         </div>
-        {showScheduleModal && (
-          <InterviewScheduleModal
-            newMeeting={newMeeting}
-            setNewMeeting={setNewMeeting}
-            setShowScheduleModal={setShowScheduleModal}
-            candidateData={candidateData} // if needed
-            onMeetingScheduled={handleMeetingScheduled} // callback to update list
-          />
-        )}
       </div>
 
+      {/* Schedule Interview Modal */}
+      {showScheduleModal && (
+        <InterviewScheduleModal
+          newMeeting={newMeeting}
+          setNewMeeting={setNewMeeting}
+          setShowScheduleModal={setShowScheduleModal}
+          candidateData={candidateData}
+          onMeetingScheduled={handleMeetingScheduled}
+        />
+      )}
+
       {/* Candidate Information Card */}
-      <div className="p-8">
+      <div className="p-3">
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 hover:shadow-2xl transition-shadow duration-300">
           <div className="flex items-center space-x-3 mb-6">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
@@ -172,7 +199,7 @@ const CandidateOverview = ({ candidateData, onStatusUpdated }) => {
                 <CiLink className="w-4 h-4" />
                 <span>LinkedIn Profile</span>
               </label>
-              <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-xl font-medium">
+              <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-xl font-medium break-all">
                 {candidateData?.linkedInProfile ? (
                   <a
                     href={candidateData.linkedInProfile}
@@ -374,16 +401,16 @@ export default CandidateOverview;
 //                 <RiInfoCardLine icon={CiMail} label="Email Address" value={candidateData.email} />
 //                 <RiInfoCardLine icon={CiPhone} label="Mobile Number" value={candidateData.mobileNo} />
 //                 <RiInfoCardLine icon={CiMapPin} label="Current Location" value={candidateData.currentLocation} />
-//                 <RiInfoCardLine 
-//                   icon={Link} 
-//                   label="LinkedIn Profile" 
-//                   value={candidateData.linkedInProfile} 
+//                 <RiInfoCardLine
+//                   icon={Link}
+//                   label="LinkedIn Profile"
+//                   value={candidateData.linkedInProfile}
 //                   isLink={true}
 //                 />
-//                 <RiInfoCardLine 
-//                   icon={FiFileText} 
-//                   label="Resume" 
-//                   value={candidateData.resume ? "View Resume" : "Not specified"} 
+//                 <RiInfoCardLine
+//                   icon={FiFileText}
+//                   label="Resume"
+//                   value={candidateData.resume ? "View Resume" : "Not specified"}
 //                   href={candidateData.resume}
 //                   isLink={true}
 //                 />
@@ -409,10 +436,10 @@ export default CandidateOverview;
 //                 <RiInfoCardLine icon={FiAward} label="Experience" value={candidateData.experience} />
 //                 <RiInfoCardLine icon={FiDollarSign} label="Expected Salary" value={candidateData.expectedSalary} />
 //                 <RiInfoCardLine icon={CiLock} label="Notice Period" value={candidateData.availabilityNoticePeriod} />
-//                 <RiInfoCardLine 
-//                   icon={CiCalendar} 
-//                   label="Applied Date" 
-//                   value={candidateData.appliedDate ? new Date(candidateData.appliedDate).toLocaleDateString() : "Not specified"} 
+//                 <RiInfoCardLine
+//                   icon={CiCalendar}
+//                   label="Applied Date"
+//                   value={candidateData.appliedDate ? new Date(candidateData.appliedDate).toLocaleDateString() : "Not specified"}
 //                 />
 //               </div>
 //             </div>

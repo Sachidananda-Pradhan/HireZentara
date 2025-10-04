@@ -1,5 +1,6 @@
 package com.HZ.HireZentara.entity;
 
+import com.HZ.HireZentara.enums.InterviewStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -50,5 +51,9 @@ public class InterviewDetails extends  BaseEntity {
 
     @Column(name = "cancelled_at")
     private  Date cancelledAt;
+
+    @Column(name = "interview_status", length = 50, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private InterviewStatus interviewStatus;
 
 }

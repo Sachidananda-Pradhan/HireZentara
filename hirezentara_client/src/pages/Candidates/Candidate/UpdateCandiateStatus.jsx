@@ -51,14 +51,8 @@ const UpdateCandidateStatus = ({ candidateData, onStatusUpdated }) => {
       setIsLoading(true);
       setError("");
       setSuccessMessage("");
-
-      // Call API to update status
       await updateCandidateStatus(sessionId, candidateId, newStatus);
-
-      // Update local state
       setCandidateStatus(newStatus);
-
-      // Notify parent component
       if (onStatusUpdated) {
         onStatusUpdated(newStatus);
       }
@@ -77,18 +71,10 @@ const UpdateCandidateStatus = ({ candidateData, onStatusUpdated }) => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 ">
       {isLoading && <p className="text-gray-600">Updating status...</p>}
       {error && <p className="text-red-500">{error}</p>}
-
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">
-        {candidateData?.name || "Unknown Candidate"}
-      </h1>
-      <p className="text-gray-600 text-lg mb-3">
-        {candidateData?.jobTitle || "Position Not Specified"}
-      </p>
-
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4  ">
         <span
           className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 ${getStatusColor(
             candidateStatus
@@ -100,20 +86,24 @@ const UpdateCandidateStatus = ({ candidateData, onStatusUpdated }) => {
         <select
           value={candidateStatus}
           onChange={(e) => handleStatusUpdate(e.target.value)}
-          className="border-2 border-gray-200 rounded-xl px-4 py-2 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 hover:border-gray-300"
+          className="border-2 border-gray-200 rounded-xl px-4 py-2  text-sm bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 hover:border-gray-300"
           disabled={isLoading}
         >
-          <option value="" disabled>
-            Select Status
-          </option>
-          {statusOptions.map((status) => (
-            <option key={status} value={status}>
+           <option value="" disabled>
+          Select Status
+        </option>
+        {statusOptions.map((status, index) => {
+          const currentIndex = statusOptions.indexOf(candidateStatus);
+          const isDisabled = index < currentIndex;
+
+          return (
+            <option key={status} value={status} disabled={isDisabled}>
               {status}
             </option>
-          ))}
-        </select>
+          );
+        })}
+      </select>
       </div>
-
       {successMessage && (
         <p className="text-green-600 mt-2">{successMessage}</p>
       )}

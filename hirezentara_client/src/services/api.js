@@ -326,6 +326,28 @@ export const cancelInterview = async (sessionId,candidateId,interviewId) => {
   }
 };
 
+// reschudle
+export const reScheduleInterview = async (sessionId, candidateId, encryptedRequestData,interviewId) => {
+  try {
+    const response = await axios.put(
+      `${BASE_URL}/candidates/reScheduleInterview`,
+      { encryptedRequestData },  // here it’s only string now
+      {
+        params: {candidateId,interviewId },
+        headers: {
+          "Session-Id": sessionId,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
+
 
 
 

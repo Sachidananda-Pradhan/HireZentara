@@ -1,38 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { FaUser, FaVideo } from 'react-icons/fa';
 import { AiTwotoneFileText } from 'react-icons/ai';
 import { CiMail } from 'react-icons/ci';
 import { RiEdit2Fill } from 'react-icons/ri';
 import { getCandidateByJobId } from '../../../services/api';
 import { decryptPayload } from '../../../services/encryptionAndDecryption';
+import Header from '../../../componate/Header';
 import Sidebar from './Sidebar.';
 import CandidateOverview from './CandidateOverview';
 import ShowResume from './ShowResume';
 import InterviewList from './InterView/InterviewList';
+import NotesFeedback from './NotesFeedback';
 
 const CandidateDashboard = () => {
-
   const [selectedTab, setSelectedTab] = useState("overview");
   const [candidateStatus, setCandidateStatus] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
-  // const [meetings, setMeetings] = useState([]);
-  // const [newMeeting, setNewMeeting] = useState({
-  //   interviewtype: '',
-  //   interviewRound: '',
-  //   interviewDate: '',
-  //   interviewStartTime: '',
-  //   interviewEndTime: '',
-  //   interviewTimeInHR: '',
-  //   meetingPlatform: '',
-  //   interviewName: '',
-  //   interviewEmail: '',
-  // });
-  const [showResumeModal, setShowResumeModal] = useState(false); // Moved here
+  const [showResumeModal, setShowResumeModal] = useState(false);
   const [selectedResume, setSelectedResume] = useState(null);
+  
   const sessionId = useSelector((state) => state.user.sessionId);
+  const userDetails = useSelector((state) => state.user.userDetails);
   const { candidateId } = useParams();
   const [candidateData, setCandidateData] = useState({});
 
@@ -58,9 +48,6 @@ const CandidateDashboard = () => {
     }
   }, [sessionId, candidateId]);
 
-  //  const handleMeetingScheduled = (newMeeting) => {
-  //   setMeetings((prev) => [...prev, newMeeting]);
-  // };
   const sidebarItems = [
     { id: "overview", label: "Overview", icon: <FaUser /> },
     { id: "resume", label: "Resume & Documents", icon: <AiTwotoneFileText /> },
@@ -70,112 +57,89 @@ const CandidateDashboard = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <Sidebar
-        selectedTab={selectedTab}
-        setSelectedTab={setSelectedTab}
-        candidateData={candidateData}
-        sidebarItems={sidebarItems}
-      />
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Header - Always visible */}
+      <Header userDetails={userDetails} />
+      
+      {/* Main Layout - Sidebar + Content */}
+      <div className="flex flex-1 overflow-hidden pt-20">
+        {/* Sidebar */}
+        <Sidebar
+          selectedTab={selectedTab}
+          setSelectedTab={setSelectedTab}
+          candidateData={candidateData}
+          sidebarItems={sidebarItems}
+        />
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto p-6">
-        {selectedTab === "overview" && (
-          <>
-            {/* Candidate info + edit mode */}
+        {/* Main Content */}
+        <div className="flex-1 overflow-auto">
+          {selectedTab === "overview" && (
             <CandidateOverview
               candidateData={candidateData}
               isEditing={isEditing}
               setIsEditing={setIsEditing}
               onStatusUpdated={(newStatus) => {
-                    setCandidateStatus(newStatus);
-                    setCandidateData((prev) => ({ ...prev, status: newStatus }));
-                }}
-            />
-
-            {/* Candidate status control
-            <UpdateCandidateStatus
-              candidateData={candidateData}
-              onStatusUpdated={(newStatus) => {
                 setCandidateStatus(newStatus);
                 setCandidateData((prev) => ({ ...prev, status: newStatus }));
               }}
-            /> */}
-          </>
-        )}
-        {selectedTab === 'interviews' && (
-          <InterviewList setSelectedTab={setSelectedTab} candidateData={candidateData} />
-        )}
+            />
+          )}
 
-            {selectedTab === 'resume' && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold mb-2">Resume & Documents</h3>
-            <hr className="border-gray-200 mb-4" />
-            <div className="space-y-4">
-              {candidateData?.resume ? (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <AiTwotoneFileText className="w-8 h-8 text-red-600" />
-                    <div>
-                      <p className="font-medium">
-                        {candidateData.name ? `${candidateData.name} Resume` : 'Candidate Resume'}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {candidateData.appliedDate
-                          ? `Uploaded on ${new Date(candidateData.appliedDate).toLocaleDateString()}`
-                          : 'Upload date not available'}
-                      </p>
+          {selectedTab === 'interviews' && (
+            <InterviewList setSelectedTab={setSelectedTab} candidateData={candidateData} />
+          )}
+
+          {selectedTab === 'resume' && (
+            <div className="bg-white rounded-lg shadow p-6 m-6">
+              <h3 className="text-lg font-semibold mb-2">Resume & Documents</h3>
+              <hr className="border-gray-200 mb-4" />
+              <div className="space-y-4">
+                {candidateData?.resume ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <AiTwotoneFileText className="w-8 h-8 text-red-600" />
+                      <div>
+                        <p className="font-medium">
+                          {candidateData.name ? `${candidateData.name} Resume` : 'Candidate Resume'}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {candidateData.appliedDate
+                            ? `Uploaded on ${new Date(candidateData.appliedDate).toLocaleDateString()}`
+                            : 'Upload date not available'}
+                        </p>
+                      </div>
                     </div>
+                    <button
+                      onClick={() => {
+                        setSelectedResume(candidateData.resume);
+                        setShowResumeModal(true);
+                      }}
+                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                      aria-label="View candidate resume"
+                    >
+                      View Resume
+                    </button>
                   </div>
-                  <button
-                    onClick={() => {
-                      setSelectedResume(candidateData.resume);
-                      setShowResumeModal(true);
-                    }}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    aria-label="View candidate resume"
-                  >
-                    View Resume
-                  </button>
-                </div>
-              ) : (
-                <p className="text-gray-500">No resume or documents available.</p>
-              )}
+                ) : (
+                  <p className="text-gray-500">No resume or documents available.</p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-            {selectedTab === "communications" && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Communications History</h3>
-                <p className="text-gray-500">Content for communications will be implemented here.</p>
-              </div>
-            )}
+          )}
 
-            {selectedTab === 'notes' && (
-           <NotesFeedback setSelectedTab={setSelectedTab} candidateData={candidateData} />
-           )}
+          {selectedTab === "communications" && (
+            <div className="bg-white rounded-lg shadow p-6 m-6">
+              <h3 className="text-lg font-semibold mb-4">Communications History</h3>
+              <p className="text-gray-500">Content for communications will be implemented here.</p>
+            </div>
+          )}
 
-            
-
-            {/* {selectedTab === "notes" && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Notes & Feedback</h3>
-                <p className="text-gray-500">Content for notes will be implemented here.</p>
-              </div>
-            )} */}
+          {selectedTab === 'notes' && (
+            <NotesFeedback setSelectedTab={setSelectedTab} candidateData={candidateData} />
+          )}
+        </div>
       </div>
 
-      {/* Schedule Modal
-      {showScheduleModal && (
-        <InterviewScheduleModal
-          newMeeting={newMeeting}
-          setNewMeeting={setNewMeeting}
-          setShowScheduleModal={setShowScheduleModal}
-          candidateData={candidateData}
-          onMeetingScheduled={handleMeetingScheduled}
-        />
-      )} */}
       {/* Resume Modal */}
       {showResumeModal && selectedResume && (
         <ShowResume

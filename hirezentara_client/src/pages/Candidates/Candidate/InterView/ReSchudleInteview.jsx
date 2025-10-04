@@ -422,7 +422,11 @@
 
 import React, { useState } from "react";
 import { FiRefreshCw } from "react-icons/fi";
-import InterviewFormModal from "./InterviewFormModal"; // Import the unified modal
+import InterviewFormModal from "./InterviewFormModal"; 
+import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import { decryptPayload, encryptPayload } from "../../../../services/encryptionAndDecryption";
+import { reScheduleInterview } from "../../../../services/api";
 
 const RescheduleInterview = ({
   interview,
@@ -430,8 +434,93 @@ const RescheduleInterview = ({
   setMeetings,
   onRescheduleOpen,
 }) => {
+//   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const sessionId = useSelector((state) => state.user.sessionId);
+//   const { candidateId } = useParams();
+//   const interviewId=interview.interviewId;
+   
+
+//   const openRescheduleModal = () => {
+//     setShowRescheduleModal(true);
+//     if (onRescheduleOpen && typeof onRescheduleOpen === "function") {
+//       onRescheduleOpen(interview);
+//     }
+//   };
+
+//   const handleRescheduleSubmit = async (formData) => {
+//     setIsLoading(true);
+//     try {
+//      setMeetings(formData);
+           
+//           const encryptedRequestData = await encryptPayload(formData);
+//           const response = await reScheduleInterview(sessionId, candidateId, encryptedRequestData,interviewId);
+//           const encryptedResponseData = response?.data?.encryptedResponseData;
+//           const decrypted = await decryptPayload(encryptedResponseData);
+//       const updatedMeeting = {
+//         ...interview,
+//         ...formData,
+//         // Map form field names to match your data structure
+//         interviewType: formData.interviewtype, // Note: mapping interviewtype to interviewType
+//         status: "RESCHEDULED",
+//       };
+
+//       setMeetings((prev) =>
+//         prev.map((m) =>
+//           m.interviewId === interview.interviewId ? updatedMeeting : m
+//         )
+//       );
+//       setShowRescheduleModal(false);
+//     } catch (error) {
+//       console.error("Rescheduling failed:", error);
+//       alert("Failed to reschedule interview. Please try again.");
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   return (
+//     <>
+//       <button
+//         type="button"
+//         className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium hover:from-emerald-600 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+//         onClick={openRescheduleModal}
+//         aria-label={`Reschedule ${interview.interviewType} interview`}
+//         disabled={isLoading}
+//       >
+//         <FiRefreshCw className="w-4 h-4" />
+//         Reschedule
+//       </button>
+
+//       {/* Use the unified InterviewFormModal */}
+//       <InterviewFormModal
+//         isOpen={showRescheduleModal}
+//         onClose={() => setShowRescheduleModal(false)}
+//         onSubmit={handleRescheduleSubmit}
+//         initialData={{
+//           interviewtype: interview.interviewType, // Note: mapping interviewType to interviewtype
+//           interviewRound: interview.interviewRound,
+//           interviewDate: interview.interviewDate,
+//           interviewStartTime: interview.interviewStartTime,
+//           interviewEndTime: interview.interviewEndTime,
+//           interviewTimeInHR: interview.interviewTimeInHR,
+//           meetingPlatform: interview.meetingPlatform,
+//           interviewName: interview.interviewName,
+//           interviewEmail: interview.interviewEmail,
+//         }}
+//         mode="reschedule"
+//         currentScheduleInfo={interview}
+//         isLoading={isLoading}
+//       />
+//     </>
+//   );
+// };
+
+// export default RescheduleInterview;
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { candidateId } = useParams();
+  const interviewId = interview.interviewId;
 
   const openRescheduleModal = () => {
     setShowRescheduleModal(true);
@@ -443,14 +532,15 @@ const RescheduleInterview = ({
   const handleRescheduleSubmit = async (formData) => {
     setIsLoading(true);
     try {
-      // Simulate API call for demo
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const encryptedRequestData = await encryptPayload(formData);
+      const response = await reScheduleInterview(sessionId,candidateId,encryptedRequestData,interviewId);
+      const responseData = response?.data?.encryptedResponseData;
+      const decrypted = await decryptPayload(responseData);
+
       const updatedMeeting = {
         ...interview,
         ...formData,
-        // Map form field names to match your data structure
-        interviewType: formData.interviewtype, // Note: mapping interviewtype to interviewType
+        interviewType: formData.interviewtype,
         status: "RESCHEDULED",
       };
 
@@ -481,13 +571,12 @@ const RescheduleInterview = ({
         Reschedule
       </button>
 
-      {/* Use the unified InterviewFormModal */}
       <InterviewFormModal
         isOpen={showRescheduleModal}
         onClose={() => setShowRescheduleModal(false)}
         onSubmit={handleRescheduleSubmit}
         initialData={{
-          interviewtype: interview.interviewType, // Note: mapping interviewType to interviewtype
+          interviewtype: interview.interviewType,
           interviewRound: interview.interviewRound,
           interviewDate: interview.interviewDate,
           interviewStartTime: interview.interviewStartTime,

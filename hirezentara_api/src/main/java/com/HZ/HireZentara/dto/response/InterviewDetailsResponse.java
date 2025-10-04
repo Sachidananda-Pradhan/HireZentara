@@ -1,5 +1,6 @@
 package com.HZ.HireZentara.dto.response;
 
+import com.HZ.HireZentara.enums.InterviewStatus;
 import lombok.Data;
 
 import java.util.Date;
@@ -23,4 +24,5 @@ public class InterviewDetailsResponse {
     private Boolean isCancelled;
     private Date createdAt;
     private Date cancelledAt;
+    private InterviewStatus interviewStatus;
 }

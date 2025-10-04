@@ -6,7 +6,7 @@ const NotesFeedback = () => {
   )
 }
 
-export default NotesFeedback
+export default NotesFeedback;
 
 
 

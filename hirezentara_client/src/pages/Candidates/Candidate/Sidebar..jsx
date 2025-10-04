@@ -2,10 +2,10 @@ import React from "react";
 
 const Sidebar = ({ selectedTab, setSelectedTab, candidateData, sidebarItems }) => {
   return (
-    <div className="w-64 bg-white shadow-lg h-full flex flex-col">
+    <div className="w-64 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50   shadow-lg h-full flex flex-col">
       {/* Candidate Info Header */}
-      <div className="p-6 border-b">
-        <div className="flex items-center space-x-3">
+      <div className="p-2 ">
+        {/* <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
             {candidateData?.name?.[0] || 'C'}
           </div>
@@ -17,7 +17,7 @@ const Sidebar = ({ selectedTab, setSelectedTab, candidateData, sidebarItems }) =
               {candidateData?.jobTitle || 'Candidate'}
             </p>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Navigation Tabs */}
