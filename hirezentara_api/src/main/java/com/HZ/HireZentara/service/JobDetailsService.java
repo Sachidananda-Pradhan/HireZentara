@@ -1,6 +1,7 @@
 package com.HZ.HireZentara.service;
 
 import com.HZ.HireZentara.dto.request.JobDetailsRequest;
+import com.HZ.HireZentara.dto.response.InterviewDetailsResponse;
 import com.HZ.HireZentara.dto.response.JobDetailsResponse;
 import com.HZ.HireZentara.dto.response.JobResponse;
 import com.HZ.HireZentara.dto.response.PageResponse;
@@ -28,4 +29,6 @@ public interface JobDetailsService {
     ResponseEntity<byte[]> downloadResume(String jobId);
 
     JobDetailsResponse getJobDetailsById(String jobId);
+
+
 }

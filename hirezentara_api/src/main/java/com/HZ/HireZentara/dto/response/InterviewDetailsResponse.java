@@ -1,5 +1,6 @@
 package com.HZ.HireZentara.dto.response;
 
+import com.HZ.HireZentara.entity.InterviewFeedback;
 import com.HZ.HireZentara.enums.InterviewStatus;
 import lombok.Data;
 
@@ -16,10 +17,11 @@ public class InterviewDetailsResponse {
     private String interviewerName;
     private String interviewerEmail;
     private String interviewType;
-    private String interviewFeedback;
+    private InterviewFeedback interviewFeedback;
     private String meetingPlatform;
     private String candidateId;
     private String candidateName;
+    private String  candidateMobileNo;
     private String feedback;
     private Boolean isCancelled;
     private Date createdAt;

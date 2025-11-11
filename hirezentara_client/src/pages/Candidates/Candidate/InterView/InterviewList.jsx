@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CiCalendar, CiLock, CiMail, CiUser } from "react-icons/ci";
-import {FiAlertTriangle,FiCheckCircle,FiExternalLink,FiPlus,FiRefreshCw,FiRotateCcw,FiUser,FiUserMinus, FiVideo, FiX,FiXCircle,} from "react-icons/fi";
+import {FiAlertTriangle,FiCheckCircle,FiExternalLink,FiMessageSquare,FiPlus,FiRefreshCw,FiRotateCcw,FiUser,FiUserMinus, FiVideo, FiX,FiXCircle,} from "react-icons/fi";
 import { RiLoader2Fill } from "react-icons/ri";
 import { getInterviewSlots } from "../../../../services/api";
 import { decryptPayload } from "../../../../services/encryptionAndDecryption";
@@ -9,6 +9,8 @@ import { useParams } from "react-router-dom";
 import InterviewScheduleModal from "./InterviewScheduleModal";
 import CancelInterview from "./CancelInterview";
 import RescheduleInterview from "./ReSchudleInteview";
+import InterviewFeedbackModal from "./InterviewFeedbackModal";
+
 
 const InterviewList = ({ setSelectedTab, candidateData }) => {
   const [meetings, setMeetings] = useState([]);
@@ -18,6 +20,9 @@ const InterviewList = ({ setSelectedTab, candidateData }) => {
   const [newMeeting, setNewMeeting] = useState({interviewtype: "",interviewRound: "",interviewDate: "",interviewStartTime: "",interviewEndTime: "",interviewTimeInHR: "",meetingPlatform: "",interviewName: "", interviewEmail: "",});
   const sessionId = useSelector((state) => state.user.sessionId);
   const { candidateId } = useParams();
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+const [selectedInterview, setSelectedInterview] = useState(null);
+  
 
   // Sorting helper
   const sortMeetings = (meetingsArray) => {
@@ -157,6 +162,22 @@ const InterviewList = ({ setSelectedTab, candidateData }) => {
         return "📋";
     }
   };
+  const handleFeedbackClick = (interview) => {
+  setSelectedInterview(interview);
+  setShowFeedbackModal(true);
+};
+
+const handleFeedbackSubmit = (feedbackData) => {
+  console.log('Feedback submitted:', feedbackData);
+  // Update the meetings array with feedback status if needed
+  setMeetings((prev) =>
+    prev.map((m) =>
+      m.interviewId === selectedInterview.interviewId
+        ? { ...m, hasFeedback: true, feedback: feedbackData }
+        : m
+    )
+  );
+};
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-6xl mx-auto">
@@ -367,6 +388,7 @@ const InterviewList = ({ setSelectedTab, candidateData }) => {
                         Join Meeting
                       </button>
                     )}
+                  
 
                     <div className="flex gap-2">
                        {!meeting.isCancelled && meeting.interviewStatus !== "RESCHEDULED" && (
@@ -385,6 +407,18 @@ const InterviewList = ({ setSelectedTab, candidateData }) => {
                         setMeetings={setMeetings}
                         isCancelled={meeting.isCancelled}
                       />
+                      {/* Feedback Modal */}
+                      {setShowFeedbackModal && selectedInterview && (
+                        <InterviewFeedbackModal
+                          interview={selectedInterview}
+                          sessionId={sessionId}
+                          onClose={() => {
+                            setShowFeedbackModal(false);
+                            setSelectedInterview(null);
+                          }}
+                          onSubmitFeedback={handleFeedbackSubmit}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>

@@ -7,10 +7,7 @@ import com.HZ.HireZentara.dto.CandidateResponse;
 import com.HZ.HireZentara.dto.request.APIRequest;
 import com.HZ.HireZentara.dto.request.CandidateInterviewSchedulerRequest;
 import com.HZ.HireZentara.dto.request.CandidateRegistrationRequest;
-import com.HZ.HireZentara.dto.response.APIResponse;
-import com.HZ.HireZentara.dto.response.CandidateAndJobDetailsResponse;
-import com.HZ.HireZentara.dto.response.CandidateRegistrationResposne;
-import com.HZ.HireZentara.dto.response.InterviewDetailsResponse;
+import com.HZ.HireZentara.dto.response.*;
 import com.HZ.HireZentara.entity.Client;
 import com.HZ.HireZentara.entity.InterviewDetails;
 import com.HZ.HireZentara.exceptions.ExceptionResponseGenerator;
@@ -30,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -247,4 +245,30 @@ public class CandidateController extends BaseController {
                     return exceptionResponseGenerator.failedToProcessResponse();
                 }
         }
+
+    // getAllInterviewSlots
+    @GetMapping("/getAllInterviewSlots")
+    public APIResponse getAllInterviewSlots(HttpServletRequest httpRequest ,
+                                            @RequestParam String jobId,
+                                            @RequestParam Optional<Integer> pageNumber,
+                                            @RequestParam Optional<Integer> pageSize,
+                                            @RequestParam(defaultValue = "false") boolean isRecent,
+                                            @RequestParam Optional<Integer> days,
+                                            @RequestParam Optional<Integer> hours,
+                                            @RequestParam(defaultValue = "ALL") List<String> interviewStatus ,
+                                            @RequestParam(defaultValue = "false") String sortFlag,
+                                            @RequestParam(defaultValue = "postedDate") String sortBy,
+                                            @RequestParam Optional<String> search) {
+        try {
+            // Validate Authorization
+            validateSessionId(httpRequest);
+            // Fetch interview slots details
+            PageResponse interviewDetailsResponses = candidateService.getAllInterviewSlots(jobId, pageNumber, pageSize, isRecent, days, hours, interviewStatus, sortFlag, sortBy, search);
+            return apiResponseUtils.generateExternalApiResponse(ApplicationConstant.SUCCESS,
+                    ApplicationConstant.SUCCESS_200, interviewDetailsResponses, null);
+        } catch (Exception e) {
+            log.error("getAllInterviewSlots :: Failed to process request : {}", e.getMessage());
+            return exceptionResponseGenerator.failedToProcessResponse();
+        }
+    }
 }

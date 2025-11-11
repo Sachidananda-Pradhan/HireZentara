@@ -473,7 +473,7 @@ const CandidateListBoard = () => {
 
   const handleViewAllInterviews = () => {
     // Navigate to interview list page
-    navigate(`/interviews/${jobId}`);
+    navigate(`/InterviewsList/${jobId}`);
   };
 
  

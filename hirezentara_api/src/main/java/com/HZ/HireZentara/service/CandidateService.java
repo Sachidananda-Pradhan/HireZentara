@@ -6,12 +6,14 @@ import com.HZ.HireZentara.dto.request.CandidateRegistrationRequest;
 import com.HZ.HireZentara.dto.response.CandidateAndJobDetailsResponse;
 import com.HZ.HireZentara.dto.response.CandidateRegistrationResposne;
 import com.HZ.HireZentara.dto.response.InterviewDetailsResponse;
+import com.HZ.HireZentara.dto.response.PageResponse;
 import com.HZ.HireZentara.entity.InterviewDetails;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public interface CandidateService {
@@ -36,4 +38,6 @@ public interface CandidateService {
     String reScheduleInterview(CandidateInterviewSchedulerRequest candidateInterviewSchedulerRequest, String candidateId, Long interviewId);
 
     String updateCandidateImage(String candidateId, MultipartFile candidateImage);
+
+    PageResponse getAllInterviewSlots(String jobId, Optional<Integer> pageNumber, Optional<Integer> pageSize, boolean isRecent, Optional<Integer> days, Optional<Integer> hours, List<String> interviewStatus, String sortFlag, String sortBy, Optional<String> search);
 }

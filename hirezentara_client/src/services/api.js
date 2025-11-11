@@ -347,6 +347,36 @@ export const reScheduleInterview = async (sessionId, candidateId, encryptedReque
   }
 };
 
+// getAllin
+export const getInterviewsListByJobId = async (sessionId , jobId, params = {}) => {
+   try {
+    const defaultParams = {
+      jobId:jobId,
+      pageNumber: 0,
+      pageSize: 10,
+      isRecent: true,
+      days: "",
+      hours:"",
+      sortFlag: "",
+      search: "",
+      sortBy: "",
+      candidateStatus:"",
+    };
+
+    const queryParams = new URLSearchParams({ ...defaultParams, ...params }).toString();
+    const response = await axios.get(`${BASE_URL}/candidates/getAllInterviewSlots?${queryParams}`, {
+      headers: {
+        "Session-Id": sessionId,
+      },
+    }
+  );
+  return response.data;
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+};
+
 
 
 

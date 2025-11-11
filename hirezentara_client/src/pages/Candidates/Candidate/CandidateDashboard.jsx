@@ -12,7 +12,8 @@ import Sidebar from './Sidebar.';
 import CandidateOverview from './CandidateOverview';
 import ShowResume from './ShowResume';
 import InterviewList from './InterView/InterviewList';
-import NotesFeedback from './NotesFeedback';
+import InterviewFeedbackModal from './InterView/InterviewFeedbackModal';
+
 
 const CandidateDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("overview");
@@ -135,7 +136,7 @@ const CandidateDashboard = () => {
           )}
 
           {selectedTab === 'notes' && (
-            <NotesFeedback setSelectedTab={setSelectedTab} candidateData={candidateData} />
+            <InterviewFeedbackModal setSelectedTab={setSelectedTab} candidateData={candidateData} />
           )}
         </div>
       </div>

@@ -6,6 +6,7 @@ import com.HZ.HireZentara.dto.request.CandidateRegistrationRequest;
 import com.HZ.HireZentara.dto.response.CandidateAndJobDetailsResponse;
 import com.HZ.HireZentara.dto.response.CandidateRegistrationResposne;
 import com.HZ.HireZentara.dto.response.InterviewDetailsResponse;
+import com.HZ.HireZentara.dto.response.PageResponse;
 import com.HZ.HireZentara.entity.Candidate;
 import com.HZ.HireZentara.entity.InterviewDetails;
 import com.HZ.HireZentara.entity.JobDetails;
@@ -18,10 +19,16 @@ import com.HZ.HireZentara.repository.JobDetailsRepository;
 import com.HZ.HireZentara.service.CandidateService;
 import com.HZ.HireZentara.utils.MeetEventCreation;
 import com.HZ.HireZentara.utils.SendEmailUtils;
+import org.springframework.boot.autoconfigure.batch.BatchProperties;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -108,6 +115,7 @@ public class CandidateServiceImpl implements CandidateService {
         candidateRepository.save(candidate);
         return "Candidate image updated successfully for candidate: " + candidate.getFullName();
     }
+
 
     @Override
     public CandidateAndJobDetailsResponse getCandidateById(String candidateId) {
@@ -203,6 +211,7 @@ public class CandidateServiceImpl implements CandidateService {
         interviewDetails.setInterviewType(candidateInterviewSchedulerRequest.getInterviewtype());
         interviewDetails.setMeetingPlatform(candidateInterviewSchedulerRequest.getMeetingPlatform());
         interviewDetails.setCandidate(candidate);
+        interviewDetails.setJobDetails(candidate.getJobDetails());
         interviewDetails.setIsCancelled(false);
         interviewDetails.setInterviewStatus(InterviewStatus.SCHEDULED);
         interviewDetails.setCreatedAt(new Date());
@@ -320,5 +329,125 @@ public class CandidateServiceImpl implements CandidateService {
         interviewDetails.setCancelledAt(new Date());
         interviewRepository.save(interviewDetails);
         return "Interview cancelled successfully for candidate: " + candidate.getFullName();
+    }
+    @Override
+    public PageResponse getAllInterviewSlots(String  jobId,
+                                             Optional<Integer> pageNumber,
+                                             Optional<Integer> pageSize,
+                                             boolean isRecent,
+                                             Optional<Integer> days,
+                                             Optional<Integer> hours,
+                                             List<String> interviewStatus,
+                                             String sortFlag,
+                                             String sortBy,
+                                             Optional<String> search) {
+        int page = pageNumber.orElse(0);
+        int size = pageSize.orElse(10);
+        Sort sort = sortFlag.equalsIgnoreCase("true") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // Fetch all interview details sorted by creation date
+        List<InterviewDetails> interviewDetails = interviewRepository.findAll(Sort.by("createdAt").descending());
+
+        if (jobId != null) {
+            Optional<JobDetails> jobOptional = jobDetailsRepository.findByJobId(jobId);
+            if (jobOptional.isPresent()) {
+                Long jobPrimaryId = jobOptional.get().getId();
+                interviewDetails = interviewDetails.stream()
+                        .filter(slot -> slot.getJobDetails() != null &&
+                                slot.getJobDetails().getId().equals(jobPrimaryId))
+                        .collect(Collectors.toList());
+            } else {
+                // No matching job found — return empty list or handle gracefully
+                interviewDetails = Collections.emptyList();
+            }
+        }
+
+        // Filter by interview status
+        if (!interviewStatus.contains("ALL")) {
+            interviewDetails = interviewDetails.stream()
+                    .filter(slot -> interviewStatus.contains(slot.getInterviewStatus().name()))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by recent days
+        if (isRecent && days.isPresent()) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_YEAR, -days.get());
+            Date thresholdDate = calendar.getTime();
+
+            interviewDetails = interviewDetails.stream()
+                    .filter(slot -> slot.getInterviewDate() != null && slot.getInterviewDate().after(thresholdDate))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by recent hours
+        if (isRecent && hours.isPresent()) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.HOUR_OF_DAY, -hours.get());
+            Date thresholdDate = calendar.getTime();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            interviewDetails = interviewDetails.stream()
+                    .filter(slot -> {
+                        try {
+                            Date startTime = formatter.parse(slot.getInterviewStartTime());
+                            return startTime.after(thresholdDate);
+                        } catch (ParseException e) {
+                            return false;
+                        }
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by search keyword
+        if (search.isPresent()) {
+            String keyword = search.get().toLowerCase();
+            interviewDetails = interviewDetails.stream()
+                    .filter(slot -> slot.getCandidate() != null &&
+                            (slot.getCandidate().getFullName().toLowerCase().contains(keyword) ||
+                                    slot.getCandidate().getMobileNo().toLowerCase().contains(keyword)))
+                    .collect(Collectors.toList());
+        }
+
+        // Pagination
+        int start = Math.toIntExact(pageable.getOffset());
+        int end = Math.min(start + pageable.getPageSize(), interviewDetails.size());
+        List<InterviewDetailsResponse> pagedResponses = (start <= end)
+                ? interviewDetails.subList(start, end).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList())
+                : Collections.emptyList();
+
+        int totalRecords = interviewDetails.size();
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+
+        return new PageResponse(pagedResponses, page, totalRecords, totalPages);
+
+    }
+
+    private InterviewDetailsResponse mapToResponse(InterviewDetails interviewDetails) {
+        InterviewDetailsResponse response = new InterviewDetailsResponse();
+        response.setInterviewId(String.valueOf(interviewDetails.getId()));
+        response.setInterviewRound(interviewDetails.getInterviewRound());
+        response.setInterviewDate(interviewDetails.getInterviewDate());
+        response.setInterviewStartTime(interviewDetails.getInterviewStartTime());
+        response.setInterviewEndTime(interviewDetails.getInterviewEndTime());
+        response.setInterviewerName(interviewDetails.getInterviewerName());
+        response.setInterviewerEmail(interviewDetails.getInterviewerEmail());
+        response.setInterviewType(interviewDetails.getInterviewType());
+        response.setInterviewFeedback(interviewDetails.getInterviewFeedback());
+        response.setMeetingPlatform(interviewDetails.getMeetingPlatform());
+        response.setCandidateId(String.valueOf(interviewDetails.getCandidate().getId()));
+        response.setCandidateName(interviewDetails.getCandidate().getFullName());
+        response.setCandidateMobileNo(interviewDetails.getCandidate().getMobileNo());
+        response.setIsCancelled(interviewDetails.getIsCancelled());
+        response.setCreatedAt(interviewDetails.getCreatedAt());
+        response.setCancelledAt(interviewDetails.getCancelledAt());
+        response.setInterviewStatus(interviewDetails.getInterviewStatus());
+        return response;
     }
 }

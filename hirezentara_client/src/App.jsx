@@ -7,6 +7,7 @@ import DashboardPage from "./pages/DashboardPage";
 import CreateJobPage from "./pages/Jobs/CreateJobPage";
 import CandidateListBoard from "./pages/Candidates/CandidateListBoard ";
 import CandidateDashboard from "./pages/Candidates/Candidate/candidateDashboard";
+import InterviewsList from "./pages/Candidates/InterviewsList";
 
 
 const App = () => {
@@ -20,6 +21,7 @@ const App = () => {
    {/* <Route path="/candidates/:jobId" element={<CandidateListBoard />} /> */}
    <Route path="/candidates/:jobId" element={<CandidateListBoard />} />
    <Route path="/candidatedashboard/:candidateId" element={<CandidateDashboard/>}/>
+   <Route path="/InterviewsList/:jobId" element={<InterviewsList/>}/>
 
 
 </Routes>

@@ -33,11 +33,12 @@ public class InterviewDetails extends  BaseEntity {
     @Column(name = "interviewer_email", length = 100, nullable = false)
     private String interviewerEmail;
 
-    @Column(name = "interview_mode", length = 50, nullable = false)
+    @Column(name = "interview_type", length = 50, nullable = false)
     private String interviewType;
 
-    @Column(name = "interview_feedback", length = 500)
-    private String interviewFeedback;
+    @OneToOne(cascade = CascadeType.ALL) // ✅ InterviewDetails → InterviewFeedback (one-to-one)
+    @JoinColumn(name = "interview_feedback_id", referencedColumnName = "id")
+    private InterviewFeedback interviewFeedback;
 
     @Column(name = "meeting_platform", length = 100)
     private String meetingPlatform;
@@ -45,6 +46,10 @@ public class InterviewDetails extends  BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY) // ✅ InterviewDetails → Candidate (many-to-one)
     @JoinColumn(name = "candidate_id", nullable = false) // foreign key in InterviewDetails table
     private Candidate candidate;
+
+    @ManyToOne(fetch = FetchType.LAZY) // ✅ InterviewDetails → JobDetails (many-to-one)
+    @JoinColumn(name = "job_details_id", nullable = false) // foreign key in InterviewDetails table
+    private JobDetails jobDetails;
 
     @Column(name = "is_cancelled")
     private Boolean isCancelled;
